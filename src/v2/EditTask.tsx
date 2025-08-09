@@ -67,7 +67,7 @@ export const EditTask = ({ task }: EditTaskProps) => {
               {!isEditMode && <Button onClick={toggleEditMode}>Edit</Button>}
             </Stack>
           </DialogTitle>
-          <DialogContent>
+          <DialogContent style={{ paddingTop: 20 }}>
             {isEditMode ? (
               <TextField
                 label="Description"

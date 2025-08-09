@@ -1,6 +1,7 @@
 import {
   type PropsWithChildren,
   useCallback,
+  useEffect,
   useMemo,
   useReducer,
 } from "react";
@@ -32,14 +33,21 @@ interface TrelloState {
   columnIds: string[];
 }
 
-const initialState: TrelloState = {
-  columns: {},
-  tasks: {},
-  columnIds: [],
-};
-
 export const TrelloProvider = ({ children }: PropsWithChildren) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const persistedData = window.localStorage.getItem("trello");
+  const initialData = persistedData
+    ? JSON.parse(persistedData)
+    : {
+        columns: {},
+        tasks: {},
+        columnIds: [],
+      };
+
+  const [state, dispatch] = useReducer(reducer, initialData);
+
+  useEffect(() => {
+    window.localStorage.setItem("trello", JSON.stringify(state));
+  }, [state]);
 
   const columns = useMemo(
     () => state.columnIds.map((columnId) => state.columns[columnId]),
