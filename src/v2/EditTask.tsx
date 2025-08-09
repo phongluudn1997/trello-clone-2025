@@ -80,46 +80,59 @@ export const EditTask = ({ task }: EditTaskProps) => {
             />
           </DialogTitle>
           <DialogContent style={{ paddingTop: 20 }}>
-            <TextField
-              label="Description"
-              fullWidth
-              name="description"
-              value={formState.description}
-              onChange={handleChange}
-              multiline
-              maxRows={4}
-            />
-
-            <Stack
-              paddingTop={2}
-              direction="row"
-              justifyContent="space-between"
-            >
-              <Typography>Images</Typography>
-              <input
-                type="file"
-                name="images"
-                accept="image/*"
-                onChange={handleFilesChange}
+            <Stack spacing={2}>
+              <TextField
+                label="Description"
+                fullWidth
+                name="description"
+                value={formState.description}
+                onChange={handleChange}
+                multiline
+                maxRows={4}
               />
-            </Stack>
 
-            <List>
-              {task.imageIds.map((imageId) => {
-                const image = getImageById(imageId);
-                if (image) {
-                  return (
-                    <ListItem key={imageId}>
-                      <ListItemAvatar>
-                        <Avatar src={image.base64Url} />
-                      </ListItemAvatar>
-                      <ListItemText primary={image.fileName} />
-                    </ListItem>
-                  );
-                }
-                return null;
-              })}
-            </List>
+              <TextField
+                label="Deadline"
+                type="date"
+                fullWidth
+                name="deadline"
+                value={formState.deadline}
+                onChange={handleChange}
+                // Prevent label overlap with Date placeholder
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+              />
+
+              <Stack direction="row" justifyContent="space-between">
+                <Typography>Images</Typography>
+                <input
+                  type="file"
+                  name="images"
+                  accept="image/*"
+                  onChange={handleFilesChange}
+                />
+              </Stack>
+
+              <List>
+                {task.imageIds.map((imageId) => {
+                  const image = getImageById(imageId);
+                  if (image) {
+                    return (
+                      <ListItem key={imageId}>
+                        <ListItemAvatar>
+                          <Avatar src={image.base64Url} />
+                        </ListItemAvatar>
+                        <ListItemText primary={image.fileName} />
+                      </ListItem>
+                    );
+                  }
+                  return null;
+                })}
+              </List>
+            </Stack>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseDialog}>Close</Button>
