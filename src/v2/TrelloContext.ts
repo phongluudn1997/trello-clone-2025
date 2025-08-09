@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { ColumnData, TaskData } from "./TrelloProvider.tsx";
+import type { ColumnData, ImageData, TaskData } from "./TrelloProvider.tsx";
 
 export type AddColumnPayload = Pick<ColumnData, "name">;
 export type AddTaskPayload = { name: string; columnId: string };
@@ -8,6 +8,11 @@ export type EditTaskPayload = {
   taskId: string;
   updatedTask: Omit<TaskData, "id">;
 };
+export type UploadImagePayload = {
+  fileName: string;
+  base64Url: string;
+};
+export type AddImageToTaskPayload = { imageId: string; taskId: string };
 
 interface TrelloContextValue {
   columns: ColumnData[];
@@ -17,6 +22,9 @@ interface TrelloContextValue {
   tasksByColumnId: (columnId: string) => TaskData[];
   getTaskById: (taskId: string) => TaskData | undefined;
   editTask: (editTaskPayload: EditTaskPayload) => void;
+  uploadImage: (uploadImagePayload: UploadImagePayload) => string;
+  getImageById: (imageId: string) => ImageData | undefined;
+  addImageToTask: (addImageToTask: AddImageToTaskPayload) => void;
 }
 
 export const TrelloContext = createContext<TrelloContextValue | undefined>(

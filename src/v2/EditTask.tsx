@@ -1,19 +1,23 @@
 import {
+  Avatar,
   Box,
+  List,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   IconButton,
+  ListItem,
+  ListItemAvatar,
   Stack,
   TextField,
+  ListItemText,
   Typography,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { useTrello } from "./useTrello.ts";
-import { useToggle } from "../common/hooks/useToggle.ts";
-import { type FormEvent, useState } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 import type { TaskData } from "./TrelloProvider.tsx";
 import { useForm } from "../common/hooks/useForm.ts";
 
@@ -22,9 +26,8 @@ interface EditTaskProps {
 }
 
 export const EditTask = ({ task }: EditTaskProps) => {
-  const { editTask } = useTrello();
+  const { editTask, uploadImage, getImageById, addImageToTask } = useTrello();
   const [isOpen, setIsModelOpen] = useState(false);
-  const [isEditMode, toggleEditMode] = useToggle();
   const { formState, handleChange } = useForm(task);
 
   const handleOpenDialog = () => {
@@ -44,6 +47,22 @@ export const EditTask = ({ task }: EditTaskProps) => {
     handleCloseDialog();
   };
 
+  const handleFilesChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { files } = event.target;
+    if (files && !!files.length) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageId = uploadImage({
+          fileName: file.name,
+          base64Url: reader.result as string,
+        });
+        addImageToTask({ imageId, taskId: task.id });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div>
       <IconButton onClick={handleOpenDialog}>
@@ -52,42 +71,60 @@ export const EditTask = ({ task }: EditTaskProps) => {
       <Dialog open={isOpen} fullWidth onClose={handleCloseDialog}>
         <Box component="form" onSubmit={handleSubmit}>
           <DialogTitle>
-            <Stack direction="row" justifyContent="space-between">
-              {isEditMode ? (
-                <TextField
-                  label="Name"
-                  fullWidth
-                  name="name"
-                  value={formState.name}
-                  onChange={handleChange}
-                />
-              ) : (
-                task.name
-              )}
-              {!isEditMode && <Button onClick={toggleEditMode}>Edit</Button>}
-            </Stack>
+            <TextField
+              label="Name"
+              fullWidth
+              name="name"
+              value={formState.name}
+              onChange={handleChange}
+            />
           </DialogTitle>
           <DialogContent style={{ paddingTop: 20 }}>
-            {isEditMode ? (
-              <TextField
-                label="Description"
-                fullWidth
-                name="description"
-                value={formState.description}
-                onChange={handleChange}
-                multiline
-                maxRows={4}
+            <TextField
+              label="Description"
+              fullWidth
+              name="description"
+              value={formState.description}
+              onChange={handleChange}
+              multiline
+              maxRows={4}
+            />
+
+            <Stack
+              paddingTop={2}
+              direction="row"
+              justifyContent="space-between"
+            >
+              <Typography>Images</Typography>
+              <input
+                type="file"
+                name="images"
+                accept="image/*"
+                onChange={handleFilesChange}
               />
-            ) : (
-              <Typography>{task.description}</Typography>
-            )}
+            </Stack>
+
+            <List>
+              {task.imageIds.map((imageId) => {
+                const image = getImageById(imageId);
+                if (image) {
+                  return (
+                    <ListItem key={imageId}>
+                      <ListItemAvatar>
+                        <Avatar src={image.base64Url} />
+                      </ListItemAvatar>
+                      <ListItemText primary={image.fileName} />
+                    </ListItem>
+                  );
+                }
+                return null;
+              })}
+            </List>
           </DialogContent>
-          {isEditMode && (
-            <DialogActions>
-              <Button onClick={handleCloseDialog}>Close</Button>
-              <Button type="submit">Save</Button>
-            </DialogActions>
-          )}
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>Close</Button>
+            <Button type="submit">Save</Button>
+          </DialogActions>
         </Box>
       </Dialog>
     </div>

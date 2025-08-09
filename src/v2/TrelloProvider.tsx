@@ -7,10 +7,12 @@ import {
 } from "react";
 import {
   type AddColumnPayload,
+  type AddImageToTaskPayload,
   type AddTaskPayload,
   type DeleteTaskPayload,
   type EditTaskPayload,
   TrelloContext,
+  type UploadImagePayload,
 } from "./TrelloContext.ts";
 import { generateId } from "./utils/generateId.ts";
 
@@ -24,13 +26,20 @@ export interface TaskData {
   id: string;
   name: string;
   description: string;
+  imageIds: string[];
   deadline?: string | Date;
+}
+
+export interface ImageData {
+  fileName: string;
+  base64Url: string;
 }
 
 interface TrelloState {
   columns: Record<string, ColumnData>;
   tasks: Record<string, TaskData>;
   columnIds: string[];
+  images: Record<string, ImageData>;
 }
 
 export const TrelloProvider = ({ children }: PropsWithChildren) => {
@@ -53,14 +62,21 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
     () => state.columnIds.map((columnId) => state.columns[columnId]),
     [state.columnIds, state.columns],
   );
+
   const tasksByColumnId = useCallback(
     (columnId: string) =>
       state.columns[columnId].taskIds.map((taskId) => state.tasks[taskId]),
     [state.columns, state.tasks],
   );
+
   const getTaskById = useCallback(
     (taskId: string) => state.tasks[taskId],
     [state.tasks],
+  );
+
+  const getImageById = useCallback(
+    (imageId: string) => state.images[imageId],
+    [state.images],
   );
 
   const addColumn = useCallback(
@@ -71,6 +87,7 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
       }),
     [],
   );
+
   const addTask = useCallback(
     (addTaskPayload: AddTaskPayload) =>
       dispatch({
@@ -87,9 +104,28 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
       }),
     [],
   );
+
   const editTask = useCallback(
     (editTaskPayload: EditTaskPayload) =>
       dispatch({ type: "EDIT_TASK", payload: editTaskPayload }),
+    [],
+  );
+
+  const uploadImage = useCallback((uploadImagePayload: UploadImagePayload) => {
+    const imageId = generateId();
+    dispatch({
+      type: "UPLOAD_IMAGE",
+      payload: {
+        ...uploadImagePayload,
+        imageId,
+      },
+    });
+    return imageId;
+  }, []);
+
+  const addImageToTask = useCallback(
+    (addImageToTaskPayload: AddImageToTaskPayload) =>
+      dispatch({ type: "ADD_IMAGE_TO_TASK", payload: addImageToTaskPayload }),
     [],
   );
 
@@ -103,6 +139,9 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
         deleteTask,
         getTaskById,
         editTask,
+        uploadImage,
+        getImageById,
+        addImageToTask,
       }}
     >
       {children}
@@ -134,7 +173,10 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
 
       return {
         ...state,
-        tasks: { ...state.tasks, [id]: { id, name, description: "" } },
+        tasks: {
+          ...state.tasks,
+          [id]: { id, name, description: "", imageIds: [] },
+        },
         columns: {
           ...state.columns,
           [columnId]: {
@@ -146,30 +188,38 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
     }
     case "DELETE_TASK": {
       const { taskId, columnId } = action.payload;
+      const existedTask = state.tasks[taskId];
+      const existedColumn = state.columns[columnId];
 
-      if (!(taskId in state.tasks)) {
-        throw new Error("Does not find task");
+      if (!existedTask) {
+        console.error(`Task with id ${taskId} not found.`);
+        return state;
       }
 
-      if (!(columnId in state.columns)) {
+      if (!existedColumn) {
         throw new Error("Does not find column");
       }
 
-      if (!state.columns[columnId].taskIds.includes(taskId)) {
+      if (!existedColumn.taskIds.includes(taskId)) {
         throw new Error("Task does not belong to Column");
       }
 
-      const tasks = state.tasks;
-      const newTasks = Object.assign({}, tasks);
+      const newImages = { ...state.images };
+      existedTask.imageIds.forEach((imageId) => delete newImages[imageId]);
+
+      const newTasks = { ...state.tasks };
       delete newTasks[taskId];
 
-      const column = state.columns[columnId];
-      const taskIds = column.taskIds.filter((id) => id !== taskId);
+      const taskIds = existedColumn.taskIds.filter((id) => id !== taskId);
 
       return {
         ...state,
         tasks: newTasks,
-        columns: { ...state.columns, [columnId]: { ...column, taskIds } },
+        columns: {
+          ...state.columns,
+          [columnId]: { ...existedColumn, taskIds },
+        },
+        images: newImages,
       };
     }
     case "EDIT_TASK": {
@@ -188,7 +238,42 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
           [taskId]: {
             ...currentTask,
             ...updatedTask,
+            // Avoid overriding uploaded images with old data,
+            // New images must be added via ADD_IMAGE_TO_TASK
+            imageIds: currentTask.imageIds,
             id: taskId,
+          },
+        },
+      };
+    }
+    case "UPLOAD_IMAGE": {
+      const { base64Url, fileName, imageId } = action.payload;
+
+      return {
+        ...state,
+        images: { ...state.images, [imageId]: { fileName, base64Url } },
+      };
+    }
+    case "ADD_IMAGE_TO_TASK": {
+      const { imageId, taskId } = action.payload;
+      const existedTask = state.tasks[taskId];
+      const existedImage = state.images[imageId];
+
+      if (!existedImage) {
+        console.error(`Image with id ${imageId} not found.`);
+        return state;
+      }
+      if (!existedTask) {
+        console.error(`Task with id ${taskId} not found.`);
+        return state;
+      }
+      return {
+        ...state,
+        tasks: {
+          ...state.tasks,
+          [taskId]: {
+            ...existedTask,
+            imageIds: [...existedTask.imageIds, imageId],
           },
         },
       };
@@ -202,4 +287,6 @@ type Action =
   | { type: "ADD_COLUMN"; payload: AddColumnPayload }
   | { type: "ADD_TASK"; payload: AddTaskPayload }
   | { type: "DELETE_TASK"; payload: DeleteTaskPayload }
-  | { type: "EDIT_TASK"; payload: EditTaskPayload };
+  | { type: "EDIT_TASK"; payload: EditTaskPayload }
+  | { type: "UPLOAD_IMAGE"; payload: UploadImagePayload & { imageId: string } }
+  | { type: "ADD_IMAGE_TO_TASK"; payload: AddImageToTaskPayload };
