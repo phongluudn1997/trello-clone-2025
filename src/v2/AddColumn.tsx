@@ -1,0 +1,55 @@
+import { useToggle } from "../common/hooks/useToggle.ts";
+import { Box, Button, IconButton, TextField } from "@mui/material";
+import type { FormEvent } from "react";
+import CancelIcon from "@mui/icons-material/Cancel";
+import { useTrello } from "./useTrello.ts";
+import { useForm } from "../common/hooks/useForm.ts";
+
+export const AddColumn = () => {
+  const { addColumn } = useTrello();
+  const [isFormOpen, toggleForm] = useToggle();
+  const { formState, handleChange, reset } = useForm({ name: "" });
+
+  if (!isFormOpen) {
+    return (
+      <Box width={300}>
+        <Button variant="outlined" onClick={toggleForm} fullWidth>
+          Add Column
+        </Button>
+      </Box>
+    );
+  }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    addColumn({ name: formState.name });
+    reset();
+    toggleForm();
+  };
+
+  const handleClose = () => {
+    reset();
+    toggleForm();
+  };
+
+  return (
+    <Box width={300}>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="Name"
+          fullWidth
+          required
+          onChange={handleChange}
+          name="name"
+          value={formState.name}
+        />
+        <Box>
+          <Button type="submit">Submit</Button>
+          <IconButton onClick={handleClose}>
+            <CancelIcon />
+          </IconButton>
+        </Box>
+      </form>
+    </Box>
+  );
+};
