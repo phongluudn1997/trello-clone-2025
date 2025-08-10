@@ -7,7 +7,7 @@ import { SortButton } from "./SortButton.tsx";
 export const Column = ({ id, name, sort }: ColumnData) => {
   return (
     <Stack width={300} spacing={2}>
-      <Stack direction="row">
+      <Stack direction="row" justifyContent="space-between">
         <Typography variant="h6" gutterBottom>
           {name}
         </Typography>

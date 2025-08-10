@@ -1,5 +1,5 @@
 import { useTrello } from "./useTrello.ts";
-import { Button } from "@mui/material";
+import { IconButton } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
@@ -15,23 +15,25 @@ export const SortButton = ({ columnId, sort }: SortButtonProps) => {
 
   if (sort === "ASC") {
     return (
-      <Button onClick={() => sortTasks({ columnId, sortDirection: "DESC" })}>
+      <IconButton
+        onClick={() => sortTasks({ columnId, sortDirection: "DESC" })}
+      >
         <KeyboardArrowDownIcon />
-      </Button>
+      </IconButton>
     );
   }
 
   if (sort === "DESC") {
     return (
-      <Button onClick={() => sortTasks({ columnId, sortDirection: "ASC" })}>
+      <IconButton onClick={() => sortTasks({ columnId, sortDirection: "ASC" })}>
         <KeyboardArrowUpIcon />
-      </Button>
+      </IconButton>
     );
   }
 
   return (
-    <Button onClick={() => sortTasks({ columnId, sortDirection: "ASC" })}>
+    <IconButton onClick={() => sortTasks({ columnId, sortDirection: "ASC" })}>
       <HorizontalRuleIcon />
-    </Button>
+    </IconButton>
   );
 };

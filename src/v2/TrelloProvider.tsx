@@ -12,6 +12,7 @@ import {
   type DeleteTaskPayload,
   type EditTaskPayload,
   type SortTasksPayload,
+  type ToggleFavoritePayload,
   TrelloContext,
   type UploadImagePayload,
 } from "./TrelloContext.ts";
@@ -32,7 +33,7 @@ export interface TaskData {
   description: string;
   imageIds: string[];
   deadline?: string | Date;
-  favorite?: boolean;
+  favorite: boolean;
 }
 
 export interface ImageData {
@@ -138,6 +139,9 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
     dispatch({ type: "SORT_TASKS", payload: sortTasksPayload });
   }, []);
 
+  const toggleFavorite = (toggleFavoritePayload: ToggleFavoritePayload) =>
+    dispatch({ type: "TOGGLE_FAVORITE", payload: toggleFavoritePayload });
+
   return (
     <TrelloContext.Provider
       value={{
@@ -152,6 +156,7 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
         getImageById,
         addImageToTask,
         sortTasks,
+        toggleFavorite,
       }}
     >
       {children}
@@ -176,7 +181,6 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
       const id = generateId();
       const { name, columnId } = action.payload;
 
-      // TODO: Test this
       if (!(columnId in state.columns)) {
         throw new Error("Does not find column");
       }
@@ -185,7 +189,7 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
         ...state,
         tasks: {
           ...state.tasks,
-          [id]: { id, name, description: "", imageIds: [] },
+          [id]: { id, name, description: "", imageIds: [], favorite: false },
         },
         columns: {
           ...state.columns,
@@ -296,9 +300,8 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
         return state;
       }
 
-      const sortedTaskIds = existedColumn.taskIds
-        .map((taskId) => state.tasks[taskId])
-        .sort((a, b) => {
+      const sortByName = (tasks: TaskData[]): TaskData[] => {
+        return tasks.sort((a, b) => {
           if (sortDirection === "ASC") {
             return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
           }
@@ -306,8 +309,17 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
             return a.name.toLowerCase() < b.name.toLowerCase() ? 1 : -1;
           }
           return 0;
-        })
-        .map((task) => task.id);
+        });
+      };
+
+      const tasks = existedColumn.taskIds.map((taskId) => state.tasks[taskId]);
+      const favoriteTasks = tasks.filter((task) => task.favorite);
+      const unfavoriteTasks = tasks.filter((task) => !task.favorite);
+
+      const sortedTaskIds = [
+        ...sortByName(favoriteTasks).map((task) => task.id),
+        ...sortByName(unfavoriteTasks).map((task) => task.id),
+      ];
 
       return {
         ...state,
@@ -318,6 +330,22 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
             taskIds: sortedTaskIds,
             sort: sortDirection,
           },
+        },
+      };
+    }
+    case "TOGGLE_FAVORITE": {
+      const { taskId } = action.payload;
+      const existedTask = state.tasks[taskId];
+      if (!existedTask) {
+        console.log(`Task with id ${taskId} not found.`);
+        return state;
+      }
+
+      return {
+        ...state,
+        tasks: {
+          ...state.tasks,
+          [taskId]: { ...existedTask, favorite: !existedTask.favorite },
         },
       };
     }
@@ -333,4 +361,5 @@ type Action =
   | { type: "EDIT_TASK"; payload: EditTaskPayload }
   | { type: "UPLOAD_IMAGE"; payload: UploadImagePayload & { imageId: string } }
   | { type: "ADD_IMAGE_TO_TASK"; payload: AddImageToTaskPayload }
-  | { type: "SORT_TASKS"; payload: SortTasksPayload };
+  | { type: "SORT_TASKS"; payload: SortTasksPayload }
+  | { type: "TOGGLE_FAVORITE"; payload: ToggleFavoritePayload };
