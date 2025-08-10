@@ -23,6 +23,12 @@ export type SortTasksPayload = {
   sortDirection: SortDirection;
 };
 export type ToggleFavoritePayload = { taskId: string };
+export type MoveTaskPayload = {
+  taskId: string;
+  sourceColumnId: string;
+  targetColumnId: string;
+  targetIndex: number;
+};
 
 interface TrelloContextValue {
   columns: ColumnData[];
@@ -37,6 +43,8 @@ interface TrelloContextValue {
   addImageToTask: (addImageToTask: AddImageToTaskPayload) => void;
   sortTasks: (sortTasksPayload: SortTasksPayload) => void;
   toggleFavorite: (toggleFavoritePayload: ToggleFavoritePayload) => void;
+  selectColumnById: (columnId: string) => ColumnData | undefined;
+  moveTask: (moveTaskPayload: MoveTaskPayload) => void;
 }
 
 export const TrelloContext = createContext<TrelloContextValue | undefined>(

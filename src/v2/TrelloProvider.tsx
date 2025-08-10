@@ -11,6 +11,7 @@ import {
   type AddTaskPayload,
   type DeleteTaskPayload,
   type EditTaskPayload,
+  type MoveTaskPayload,
   type SortTasksPayload,
   type ToggleFavoritePayload,
   TrelloContext,
@@ -64,25 +65,30 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
     window.localStorage.setItem("trello", JSON.stringify(state));
   }, [state]);
 
-  const columns = useMemo(
+  const selectColumns = useMemo(
     () => state.columnIds.map((columnId) => state.columns[columnId]),
     [state.columnIds, state.columns],
   );
 
-  const tasksByColumnId = useCallback(
+  const selectTasksByColumnId = useCallback(
     (columnId: string) =>
       state.columns[columnId].taskIds.map((taskId) => state.tasks[taskId]),
     [state.columns, state.tasks],
   );
 
-  const getTaskById = useCallback(
+  const selectTaskById = useCallback(
     (taskId: string) => state.tasks[taskId],
     [state.tasks],
   );
 
-  const getImageById = useCallback(
+  const selectImageById = useCallback(
     (imageId: string) => state.images[imageId],
     [state.images],
+  );
+
+  const selectColumnById = useCallback(
+    (columnId: string) => state.columns[columnId],
+    [state.columns],
   );
 
   const addColumn = useCallback(
@@ -139,24 +145,33 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
     dispatch({ type: "SORT_TASKS", payload: sortTasksPayload });
   }, []);
 
-  const toggleFavorite = (toggleFavoritePayload: ToggleFavoritePayload) =>
-    dispatch({ type: "TOGGLE_FAVORITE", payload: toggleFavoritePayload });
+  const toggleFavorite = useCallback(
+    (toggleFavoritePayload: ToggleFavoritePayload) =>
+      dispatch({ type: "TOGGLE_FAVORITE", payload: toggleFavoritePayload }),
+    [],
+  );
+
+  const moveTask = useCallback((moveTaskPayload: MoveTaskPayload) => {
+    dispatch({ type: "MOVE_TASK", payload: moveTaskPayload });
+  }, []);
 
   return (
     <TrelloContext.Provider
       value={{
-        columns,
+        columns: selectColumns,
         addColumn,
         addTask,
-        tasksByColumnId,
+        tasksByColumnId: selectTasksByColumnId,
         deleteTask,
-        getTaskById,
+        getTaskById: selectTaskById,
         editTask,
         uploadImage,
-        getImageById,
+        getImageById: selectImageById,
         addImageToTask,
         sortTasks,
         toggleFavorite,
+        selectColumnById,
+        moveTask,
       }}
     >
       {children}
@@ -349,6 +364,51 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
         },
       };
     }
+    case "MOVE_TASK": {
+      const { taskId, sourceColumnId, targetColumnId, targetIndex } =
+        action.payload;
+      const sourceColumn = state.columns[sourceColumnId];
+      const targetColumn = state.columns[targetColumnId];
+
+      if (sourceColumnId === targetColumnId) {
+        const removedTaskIds = sourceColumn.taskIds.filter(
+          (id) => id !== taskId,
+        );
+        return {
+          ...state,
+          columns: {
+            ...state.columns,
+            [sourceColumnId]: {
+              ...sourceColumn,
+              taskIds: [
+                ...removedTaskIds.slice(0, targetIndex),
+                taskId,
+                ...removedTaskIds.slice(targetIndex),
+              ],
+            },
+          },
+        };
+      }
+
+      return {
+        ...state,
+        columns: {
+          ...state.columns,
+          [sourceColumnId]: {
+            ...sourceColumn,
+            taskIds: sourceColumn.taskIds.filter((id) => id !== taskId),
+          },
+          [targetColumnId]: {
+            ...targetColumn,
+            taskIds: [
+              ...targetColumn.taskIds.slice(0, targetIndex),
+              taskId,
+              ...targetColumn.taskIds.slice(targetIndex),
+            ],
+          },
+        },
+      };
+    }
     default:
       return state;
   }
@@ -362,4 +422,5 @@ type Action =
   | { type: "UPLOAD_IMAGE"; payload: UploadImagePayload & { imageId: string } }
   | { type: "ADD_IMAGE_TO_TASK"; payload: AddImageToTaskPayload }
   | { type: "SORT_TASKS"; payload: SortTasksPayload }
-  | { type: "TOGGLE_FAVORITE"; payload: ToggleFavoritePayload };
+  | { type: "TOGGLE_FAVORITE"; payload: ToggleFavoritePayload }
+  | { type: "MOVE_TASK"; payload: MoveTaskPayload };
