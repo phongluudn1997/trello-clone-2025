@@ -1,4 +1,4 @@
-import type { TaskData } from "./TrelloProvider.tsx";
+import type { TaskData } from "../providers/TrelloProvider.tsx";
 import {
   ButtonGroup,
   Card,
@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useTrello } from "./useTrello.ts";
+import { useTrello } from "../common/hooks/useTrello.ts";
 import { EditTask } from "./EditTask.tsx";
 import NotesIcon from "@mui/icons-material/Notes";
 import { MoveTask } from "./MoveTask.tsx";

@@ -1,8 +1,8 @@
-import type { TaskData } from "./TrelloProvider.tsx";
+import type { TaskData } from "../providers/TrelloProvider.tsx";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { IconButton } from "@mui/material";
-import { useTrello } from "./useTrello.ts";
+import { useTrello } from "../common/hooks/useTrello.ts";
 
 interface FavoriteButtonProps {
   task: TaskData;

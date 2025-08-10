@@ -1,5 +1,5 @@
 import "./App.css";
-import { TrelloBoard } from "./v2/TrelloBoard.tsx";
+import { TrelloBoard } from "./components/TrelloBoard.tsx";
 
 function App() {
   return (

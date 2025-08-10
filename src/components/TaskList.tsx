@@ -1,4 +1,4 @@
-import { useTrello } from "./useTrello.ts";
+import { useTrello } from "../common/hooks/useTrello.ts";
 import { Stack } from "@mui/material";
 import { TaskCard } from "./TaskCard.tsx";
 

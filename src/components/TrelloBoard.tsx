@@ -1,6 +1,6 @@
 import { Stack } from "@mui/material";
 import { ColumnList } from "./ColumnList.tsx";
-import { TrelloProvider } from "./TrelloProvider.tsx";
+import { TrelloProvider } from "../providers/TrelloProvider.tsx";
 import { AddColumn } from "./AddColumn.tsx";
 
 export const TrelloBoard = () => {

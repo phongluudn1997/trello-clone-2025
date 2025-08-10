@@ -17,7 +17,7 @@ import {
   TrelloContext,
   type UploadImagePayload,
 } from "./TrelloContext.ts";
-import { generateId } from "./utils/generateId.ts";
+import { generateId } from "../common/utils/generateId.ts";
 
 export type SortDirection = "ASC" | "DESC" | undefined;
 

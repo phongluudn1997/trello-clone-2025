@@ -16,9 +16,9 @@ import {
   Typography,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import { useTrello } from "./useTrello.ts";
+import { useTrello } from "../common/hooks/useTrello.ts";
 import { type ChangeEvent, type FormEvent, useState } from "react";
-import type { TaskData } from "./TrelloProvider.tsx";
+import type { TaskData } from "../providers/TrelloProvider.tsx";
 import { useForm } from "../common/hooks/useForm.ts";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 

@@ -1,9 +1,9 @@
-import { useTrello } from "./useTrello.ts";
+import { useTrello } from "../common/hooks/useTrello.ts";
 import { IconButton } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
-import type { SortDirection } from "./TrelloProvider.tsx";
+import type { SortDirection } from "../providers/TrelloProvider.tsx";
 
 interface SortButtonProps {
   columnId: string;
