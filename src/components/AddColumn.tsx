@@ -34,7 +34,7 @@ export const AddColumn = () => {
 
   return (
     <Box width={300}>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} role="form">
         <TextField
           label="Name"
           fullWidth
@@ -45,7 +45,7 @@ export const AddColumn = () => {
         />
         <Box>
           <Button type="submit">Submit</Button>
-          <IconButton onClick={handleClose}>
+          <IconButton onClick={handleClose} aria-label="cancel">
             <CancelIcon />
           </IconButton>
         </Box>

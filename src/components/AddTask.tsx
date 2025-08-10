@@ -32,8 +32,13 @@ export const AddTask = ({ columnId }: AddTaskProps) => {
     toggleForm();
   };
 
+  const handleClose = () => {
+    reset();
+    toggleForm();
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} role="form">
       <TextField
         fullWidth
         label="Name"
@@ -44,7 +49,7 @@ export const AddTask = ({ columnId }: AddTaskProps) => {
       />
       <br />
       <Button type="submit">Submit</Button>
-      <IconButton onClick={toggleForm}>
+      <IconButton onClick={handleClose} aria-label="cancel">
         <CancelIcon />
       </IconButton>
     </form>
