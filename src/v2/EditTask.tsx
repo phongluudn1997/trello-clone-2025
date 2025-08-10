@@ -20,6 +20,7 @@ import { useTrello } from "./useTrello.ts";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import type { TaskData } from "./TrelloProvider.tsx";
 import { useForm } from "../common/hooks/useForm.ts";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 interface EditTaskProps {
   task: TaskData;
@@ -108,12 +109,21 @@ export const EditTask = ({ task }: EditTaskProps) => {
 
               <Stack direction="row" justifyContent="space-between">
                 <Typography>Images</Typography>
-                <input
-                  type="file"
-                  name="images"
-                  accept="image/*"
-                  onChange={handleFilesChange}
-                />
+                <Button
+                  component="label"
+                  variant="contained"
+                  tabIndex={-1}
+                  startIcon={<CloudUploadIcon />}
+                >
+                  Upload files
+                  <input
+                    hidden
+                    type="file"
+                    name="images"
+                    accept="image/*"
+                    onChange={handleFilesChange}
+                  />
+                </Button>
               </Stack>
 
               <List>

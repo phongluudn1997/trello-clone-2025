@@ -2,13 +2,17 @@ import { Stack, Typography } from "@mui/material";
 import { TaskList } from "./TaskList.tsx";
 import type { ColumnData } from "./TrelloProvider.tsx";
 import { AddTask } from "./AddTask.tsx";
+import { SortButton } from "./SortButton.tsx";
 
-export const Column = ({ id, name }: ColumnData) => {
+export const Column = ({ id, name, sort }: ColumnData) => {
   return (
     <Stack width={300} spacing={2}>
-      <Typography variant="h6" gutterBottom>
-        {name}
-      </Typography>
+      <Stack direction="row">
+        <Typography variant="h6" gutterBottom>
+          {name}
+        </Typography>
+        <SortButton columnId={id} sort={sort} />
+      </Stack>
       <TaskList columnId={id} />
       <AddTask columnId={id} />
     </Stack>

@@ -11,15 +11,19 @@ import {
   type AddTaskPayload,
   type DeleteTaskPayload,
   type EditTaskPayload,
+  type SortTasksPayload,
   TrelloContext,
   type UploadImagePayload,
 } from "./TrelloContext.ts";
 import { generateId } from "./utils/generateId.ts";
 
+export type SortDirection = "ASC" | "DESC" | undefined;
+
 export interface ColumnData {
   id: string;
   name: string;
   taskIds: string[];
+  sort: SortDirection;
 }
 
 export interface TaskData {
@@ -28,6 +32,7 @@ export interface TaskData {
   description: string;
   imageIds: string[];
   deadline?: string | Date;
+  favorite?: boolean;
 }
 
 export interface ImageData {
@@ -129,6 +134,10 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
     [],
   );
 
+  const sortTasks = useCallback((sortTasksPayload: SortTasksPayload) => {
+    dispatch({ type: "SORT_TASKS", payload: sortTasksPayload });
+  }, []);
+
   return (
     <TrelloContext.Provider
       value={{
@@ -142,6 +151,7 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
         uploadImage,
         getImageById,
         addImageToTask,
+        sortTasks,
       }}
     >
       {children}
@@ -157,7 +167,7 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
         ...state,
         columns: {
           ...state.columns,
-          [id]: { id, name: action.payload.name, taskIds: [] },
+          [id]: { id, name: action.payload.name, taskIds: [], sort: undefined },
         },
         columnIds: [...state.columnIds, id],
       };
@@ -278,6 +288,39 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
         },
       };
     }
+    case "SORT_TASKS": {
+      const { columnId, sortDirection } = action.payload;
+      const existedColumn = state.columns[columnId];
+      if (!existedColumn) {
+        console.error(`Column with id ${columnId} not found.`);
+        return state;
+      }
+
+      const sortedTaskIds = existedColumn.taskIds
+        .map((taskId) => state.tasks[taskId])
+        .sort((a, b) => {
+          if (sortDirection === "ASC") {
+            return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+          }
+          if (sortDirection === "DESC") {
+            return a.name.toLowerCase() < b.name.toLowerCase() ? 1 : -1;
+          }
+          return 0;
+        })
+        .map((task) => task.id);
+
+      return {
+        ...state,
+        columns: {
+          ...state.columns,
+          [columnId]: {
+            ...existedColumn,
+            taskIds: sortedTaskIds,
+            sort: sortDirection,
+          },
+        },
+      };
+    }
     default:
       return state;
   }
@@ -289,4 +332,5 @@ type Action =
   | { type: "DELETE_TASK"; payload: DeleteTaskPayload }
   | { type: "EDIT_TASK"; payload: EditTaskPayload }
   | { type: "UPLOAD_IMAGE"; payload: UploadImagePayload & { imageId: string } }
-  | { type: "ADD_IMAGE_TO_TASK"; payload: AddImageToTaskPayload };
+  | { type: "ADD_IMAGE_TO_TASK"; payload: AddImageToTaskPayload }
+  | { type: "SORT_TASKS"; payload: SortTasksPayload };
