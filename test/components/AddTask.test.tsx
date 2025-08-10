@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { AddTask } from "./AddTask";
-import { useTrello } from "../common/hooks/useTrello";
-import { useToggle } from "../common/hooks/useToggle";
-import { useForm } from "../common/hooks/useForm";
+import { AddTask } from "../../src/components/AddTask";
+import { useTrello } from "../../src/common/hooks/useTrello";
+import { useToggle } from "../../src/common/hooks/useToggle";
+import { useForm } from "../../src/common/hooks/useForm";
 import "@testing-library/jest-dom";
 
-jest.mock("../common/hooks/useTrello");
-jest.mock("../common/hooks/useToggle");
-jest.mock("../common/hooks/useForm");
+jest.mock("../../src/common/hooks/useTrello");
+jest.mock("../../src/common/hooks/useToggle");
+jest.mock("../../src/common/hooks/useForm");
 
 describe("AddTask", () => {
   const mockAddTask = jest.fn();

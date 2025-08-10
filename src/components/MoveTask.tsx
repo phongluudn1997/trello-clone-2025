@@ -31,11 +31,11 @@ export const MoveTask = (props: MoveTaskProps) => {
 
   return (
     <div>
-      <IconButton onClick={handleOpenDialog}>
+      <IconButton onClick={handleOpenDialog} aria-label="moveTask">
         <DriveFileMoveIcon />
       </IconButton>
       <Dialog open={isOpen} fullWidth onClose={handleCloseDialog}>
-        <MoveTaskForm {...props} onClose={handleCloseDialog} />
+        {isOpen && <MoveTaskForm {...props} onClose={handleCloseDialog} />}
       </Dialog>
     </div>
   );
@@ -99,7 +99,7 @@ export const MoveTaskForm = ({
     return column.taskIds;
   };
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} role="form">
       <DialogContent style={{ paddingTop: 20 }}>
         <Stack direction="row" spacing={2}>
           <Select

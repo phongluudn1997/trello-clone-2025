@@ -1,12 +1,12 @@
-import { useTrello } from "../common/hooks/useTrello";
-import { ColumnList } from "./ColumnList";
+import { useTrello } from "../../src/common/hooks/useTrello";
+import { ColumnList } from "../../src/components/ColumnList";
 import { render, screen } from "@testing-library/react";
-import { Column } from "./Column";
-import { ColumnData } from "../providers/TrelloProvider";
+import { Column } from "../../src/components/Column";
+import { ColumnData } from "../../src/providers/TrelloProvider";
 
-jest.mock("../common/hooks/useTrello");
+jest.mock("../../src/common/hooks/useTrello");
 
-jest.mock("./Column", () => ({
+jest.mock("../../src/components/Column", () => ({
   Column: jest.fn(({ id, name }) => (
     <div data-testid={`column-${id}`}>Column: {name}</div>
   )),

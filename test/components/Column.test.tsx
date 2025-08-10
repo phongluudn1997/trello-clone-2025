@@ -1,21 +1,21 @@
 import { render, screen } from "@testing-library/react";
-import { TaskList } from "./TaskList";
-import { AddTask } from "./AddTask";
-import { Column } from "./Column";
+import { TaskList } from "../../src/components/TaskList";
+import { AddTask } from "../../src/components/AddTask";
+import { Column } from "../../src/components/Column";
 
-jest.mock("./TaskList", () => ({
+jest.mock("../../src/components/TaskList", () => ({
   TaskList: jest.fn(({ columnId }) => (
     <div data-testid={`taskList-${columnId}`}>Mock TaskList</div>
   )),
 }));
 
-jest.mock("./AddTask", () => ({
+jest.mock("../../src/components/AddTask", () => ({
   AddTask: jest.fn(({ columnId }) => (
     <div data-testid={`addTask-${columnId}`}>Mock AddTask</div>
   )),
 }));
 
-jest.mock("./SortButton", () => ({
+jest.mock("../../src/components/SortButton", () => ({
   SortButton: jest.fn(({ columnId, sort }) => (
     <div data-testid={`sortButton-${columnId}-${sort}`}>Mock SortButton</div>
   )),

@@ -66,11 +66,11 @@ export const EditTask = ({ task }: EditTaskProps) => {
 
   return (
     <div>
-      <IconButton onClick={handleOpenDialog}>
+      <IconButton onClick={handleOpenDialog} aria-label="edit">
         <EditIcon />
       </IconButton>
       <Dialog open={isOpen} fullWidth onClose={handleCloseDialog}>
-        <Box component="form" onSubmit={handleSubmit}>
+        <Box component="form" onSubmit={handleSubmit} role="form">
           <DialogTitle>
             <TextField
               label="Name"

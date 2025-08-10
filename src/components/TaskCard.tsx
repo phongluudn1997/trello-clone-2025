@@ -34,7 +34,7 @@ export const TaskCard = ({ task, columnId }: TaskCardProps) => {
           <ButtonGroup size="small">
             <FavoriteButton task={task} />
             <EditTask task={task} />
-            <IconButton onClick={handleDeleteTask}>
+            <IconButton onClick={handleDeleteTask} aria-label="delete">
               <DeleteIcon />
             </IconButton>
             <MoveTask taskId={task.id} columnId={columnId} />

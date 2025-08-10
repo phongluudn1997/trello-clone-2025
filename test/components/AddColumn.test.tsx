@@ -1,13 +1,13 @@
-import { AddColumn } from "./AddColumn.tsx";
+import { AddColumn } from "../../src/components/AddColumn.tsx";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { useToggle } from "../common/hooks/useToggle";
-import { useTrello } from "../common/hooks/useTrello";
-import { useForm } from "../common/hooks/useForm";
+import { useToggle } from "../../src/common/hooks/useToggle";
+import { useTrello } from "../../src/common/hooks/useTrello";
+import { useForm } from "../../src/common/hooks/useForm";
 
-jest.mock("../common/hooks/useTrello");
-jest.mock("../common/hooks/useToggle");
-jest.mock("../common/hooks/useForm");
+jest.mock("../../src/common/hooks/useTrello");
+jest.mock("../../src/common/hooks/useToggle");
+jest.mock("../../src/common/hooks/useForm");
 
 describe("AddColumn", () => {
   const mockAddColumn = jest.fn();
