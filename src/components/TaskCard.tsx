@@ -1,4 +1,3 @@
-import type { TaskData } from "../providers/TrelloProvider.tsx";
 import {
   ButtonGroup,
   Card,
@@ -11,6 +10,8 @@ import NotesIcon from "@mui/icons-material/Notes";
 import { MoveTask } from "./MoveTask.tsx";
 import { FavoriteButton } from "./FavoriteButton.tsx";
 import { DeleteTask } from "./DeleteTask";
+
+import { TaskData } from "../common/types/taskData";
 
 interface TaskCardProps {
   task: TaskData;

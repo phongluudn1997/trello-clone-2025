@@ -2,7 +2,8 @@ import { useTrello } from "../../src/common/hooks/useTrello";
 import { ColumnList } from "../../src/components/ColumnList";
 import { render, screen } from "@testing-library/react";
 import { Column } from "../../src/components/Column";
-import { ColumnData } from "../../src/providers/TrelloProvider";
+
+import { ColumnData } from "../../src/common/types/columnData";
 
 jest.mock("../../src/common/hooks/useTrello");
 

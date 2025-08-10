@@ -2,7 +2,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { MoveTask, MoveTaskForm } from "../../src/components/MoveTask";
 import { useTrello } from "../../src/common/hooks/useTrello";
 import "@testing-library/jest-dom";
-import { ColumnData } from "../../src/providers/TrelloProvider";
+
+import { ColumnData } from "../../src/common/types/columnData";
 
 jest.mock("../../src/common/hooks/useTrello");
 

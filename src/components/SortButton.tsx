@@ -3,7 +3,8 @@ import { IconButton } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
-import type { SortDirection } from "../providers/TrelloProvider.tsx";
+
+import { SortDirection } from "../common/types/sortDirection";
 
 interface SortButtonProps {
   columnId: string;

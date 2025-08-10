@@ -2,7 +2,8 @@ import { render } from "@testing-library/react";
 import { TaskList } from "../../src/components/TaskList";
 import { useTrello } from "../../src/common/hooks/useTrello";
 import { TaskCard } from "../../src/components/TaskCard";
-import { TaskData } from "../../src/providers/TrelloProvider";
+
+import { TaskData } from "../../src/common/types/taskData";
 
 jest.mock("../../src/components/TaskCard", () => ({
   TaskCard: jest.fn(({ columnId }) => (

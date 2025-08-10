@@ -1,8 +1,9 @@
 import { Stack, Typography } from "@mui/material";
 import { TaskList } from "./TaskList.tsx";
-import type { ColumnData } from "../providers/TrelloProvider.tsx";
 import { AddTask } from "./AddTask.tsx";
 import { SortButton } from "./SortButton.tsx";
+
+import { ColumnData } from "../common/types/columnData";
 
 export const Column = ({ id, name, sort }: ColumnData) => {
   return (
