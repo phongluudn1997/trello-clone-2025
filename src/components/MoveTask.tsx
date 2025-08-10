@@ -50,32 +50,31 @@ export const MoveTaskForm = ({
   taskId,
   onClose,
 }: MoveTaskFormProps) => {
-  const { columns, moveTask } = useTrello();
-  const column = columns.find((column) => column.id === columnId);
-  const defaultTargetIndex = column?.taskIds.indexOf(taskId).toString();
-
-  const [formState, setFormState] = useState(() => {
-    return {
-      targetColumnId: columnId,
-      targetIndex: defaultTargetIndex,
-    };
+  const { columns, moveTask, selectColumnById } = useTrello();
+  const column = selectColumnById(columnId);
+  const taskIndex = column.taskIds.indexOf(taskId);
+  const [formState, setFormState] = useState({
+    targetColumnId: columnId,
+    targetIndex: taskIndex.toString(),
   });
 
-  const handleChange = (event: SelectChangeEvent) => {
-    const { name, value } = event.target;
-    if (name === "targetColumnId") {
-      const selectedColumn = columns.find((column) => column.id === value);
-      const targetIndex = selectedColumn?.taskIds.length
-        ? (selectedColumn.taskIds.length - 1).toString()
-        : "0";
+  const handleColumnChange = (event: SelectChangeEvent) => {
+    const newColumnId = event.target.value;
+    const newColumn = selectColumnById(newColumnId);
 
-      setFormState({
-        targetColumnId: value,
-        targetIndex,
-      });
-    } else {
-      setFormState((formState) => ({ ...formState, [name]: value }));
-    }
+    const lastIndex = newColumn.taskIds.length;
+
+    setFormState({
+      targetColumnId: newColumnId,
+      targetIndex: lastIndex.toString(),
+    });
+  };
+
+  const handleIndexChange = (event: SelectChangeEvent) => {
+    setFormState((formState) => ({
+      ...formState,
+      targetIndex: event.target.value,
+    }));
   };
 
   const handleSubmit = (event: FormEvent) => {
@@ -89,15 +88,23 @@ export const MoveTaskForm = ({
 
     onClose();
   };
-  const getTaskIndexOptions = () => {
-    const column = columns.find(
-      (column) => column.id === formState.targetColumnId,
-    );
-    if (!column?.taskIds.length) {
-      return [""];
-    }
-    return column.taskIds;
+
+  /**
+   * Return Array like of range of options for targetIndex
+   * If targetColumn is current column, same array length - same number of tasks
+   * If targetColumn is different, array length + 1 - since we add new task to this targetColumn
+   */
+  const targetIndexOptions = () => {
+    const targetColumn = selectColumnById(formState.targetColumnId);
+    const targetColumnTasks = targetColumn.taskIds.length;
+    return Array.from({
+      length:
+        targetColumn.id === column.id
+          ? targetColumnTasks
+          : targetColumnTasks + 1,
+    });
   };
+
   return (
     <form onSubmit={handleSubmit} role="form">
       <DialogContent style={{ paddingTop: 20 }}>
@@ -106,7 +113,7 @@ export const MoveTaskForm = ({
             label="Target Column"
             value={formState.targetColumnId}
             name="targetColumnId"
-            onChange={handleChange}
+            onChange={handleColumnChange}
           >
             {columns.map((column) => (
               <MenuItem key={column.id} value={column.id}>
@@ -118,9 +125,9 @@ export const MoveTaskForm = ({
             label="Position"
             name="targetIndex"
             value={formState.targetIndex}
-            onChange={handleChange}
+            onChange={handleIndexChange}
           >
-            {getTaskIndexOptions().map((_, index) => (
+            {targetIndexOptions().map((_, index) => (
               <MenuItem key={index} value={index.toString()}>
                 {index}
               </MenuItem>

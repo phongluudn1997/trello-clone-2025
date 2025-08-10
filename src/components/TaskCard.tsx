@@ -4,15 +4,13 @@ import {
   Card,
   CardActions,
   CardHeader,
-  IconButton,
   Typography,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { useTrello } from "../common/hooks/useTrello.ts";
 import { EditTask } from "./EditTask.tsx";
 import NotesIcon from "@mui/icons-material/Notes";
 import { MoveTask } from "./MoveTask.tsx";
 import { FavoriteButton } from "./FavoriteButton.tsx";
+import { DeleteTask } from "./DeleteTask";
 
 interface TaskCardProps {
   task: TaskData;
@@ -20,12 +18,6 @@ interface TaskCardProps {
 }
 
 export const TaskCard = ({ task, columnId }: TaskCardProps) => {
-  const { deleteTask } = useTrello();
-
-  const handleDeleteTask = () => {
-    deleteTask({ taskId: task.id, columnId });
-  };
-
   return (
     <Card>
       <CardHeader
@@ -34,9 +26,7 @@ export const TaskCard = ({ task, columnId }: TaskCardProps) => {
           <ButtonGroup size="small">
             <FavoriteButton task={task} />
             <EditTask task={task} />
-            <IconButton onClick={handleDeleteTask} aria-label="delete">
-              <DeleteIcon />
-            </IconButton>
+            <DeleteTask taskId={task.id} columnId={columnId} />
             <MoveTask taskId={task.id} columnId={columnId} />
           </ButtonGroup>
         }
