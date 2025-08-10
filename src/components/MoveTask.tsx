@@ -62,7 +62,13 @@ export const MoveTaskForm = ({
     const newColumnId = event.target.value;
     const newColumn = selectColumnById(newColumnId);
 
-    const lastIndex = newColumn.taskIds.length;
+    /**
+     * Calculates the target index for moving a task
+     * If same column, prefer current index
+     * If different column, prefer last index (after added)
+     */
+    const lastIndex =
+      newColumn.id === column.id ? taskIndex : newColumn.taskIds.length;
 
     setFormState({
       targetColumnId: newColumnId,

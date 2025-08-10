@@ -1,10 +1,4 @@
-import {
-  type PropsWithChildren,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-} from "react";
+import { type PropsWithChildren, useCallback, useMemo } from "react";
 import {
   type AddColumnPayload,
   type AddImageToTaskPayload,
@@ -18,6 +12,7 @@ import {
   type UploadImagePayload,
 } from "./TrelloContext.ts";
 import { generateId } from "../common/utils/generateId.ts";
+import { useLocalStorage } from "../common/hooks/useLocalStorage";
 
 export type SortDirection = "ASC" | "DESC" | undefined;
 
@@ -49,21 +44,19 @@ interface TrelloState {
   images: Record<string, ImageData>;
 }
 
+const initialValue: TrelloState = {
+  columns: {},
+  tasks: {},
+  columnIds: [],
+  images: {},
+};
+
 export const TrelloProvider = ({ children }: PropsWithChildren) => {
-  const persistedData = window.localStorage.getItem("trello");
-  const initialData = persistedData
-    ? JSON.parse(persistedData)
-    : {
-        columns: {},
-        tasks: {},
-        columnIds: [],
-      };
-
-  const [state, dispatch] = useReducer(reducer, initialData);
-
-  useEffect(() => {
-    window.localStorage.setItem("trello", JSON.stringify(state));
-  }, [state]);
+  const [state, dispatch] = useLocalStorage<TrelloState, TrelloAction>({
+    key: "trello",
+    reducer,
+    initialValue,
+  });
 
   const selectColumns = useMemo(
     () => state.columnIds.map((columnId) => state.columns[columnId]),
@@ -97,7 +90,7 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
         type: "ADD_COLUMN",
         payload: addColumnPayload,
       }),
-    [],
+    [dispatch],
   );
 
   const addTask = useCallback(
@@ -106,7 +99,7 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
         type: "ADD_TASK",
         payload: addTaskPayload,
       }),
-    [],
+    [dispatch],
   );
   const deleteTask = useCallback(
     (deleteTaskPayload: DeleteTaskPayload) =>
@@ -114,46 +107,55 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
         type: "DELETE_TASK",
         payload: deleteTaskPayload,
       }),
-    [],
+    [dispatch],
   );
 
   const editTask = useCallback(
     (editTaskPayload: EditTaskPayload) =>
       dispatch({ type: "EDIT_TASK", payload: editTaskPayload }),
-    [],
+    [dispatch],
   );
 
-  const uploadImage = useCallback((uploadImagePayload: UploadImagePayload) => {
-    const imageId = generateId();
-    dispatch({
-      type: "UPLOAD_IMAGE",
-      payload: {
-        ...uploadImagePayload,
-        imageId,
-      },
-    });
-    return imageId;
-  }, []);
+  const uploadImage = useCallback(
+    (uploadImagePayload: UploadImagePayload) => {
+      const imageId = generateId();
+      dispatch({
+        type: "UPLOAD_IMAGE",
+        payload: {
+          ...uploadImagePayload,
+          imageId,
+        },
+      });
+      return imageId;
+    },
+    [dispatch],
+  );
 
   const addImageToTask = useCallback(
     (addImageToTaskPayload: AddImageToTaskPayload) =>
       dispatch({ type: "ADD_IMAGE_TO_TASK", payload: addImageToTaskPayload }),
-    [],
+    [dispatch],
   );
 
-  const sortTasks = useCallback((sortTasksPayload: SortTasksPayload) => {
-    dispatch({ type: "SORT_TASKS", payload: sortTasksPayload });
-  }, []);
+  const sortTasks = useCallback(
+    (sortTasksPayload: SortTasksPayload) => {
+      dispatch({ type: "SORT_TASKS", payload: sortTasksPayload });
+    },
+    [dispatch],
+  );
 
   const toggleFavorite = useCallback(
     (toggleFavoritePayload: ToggleFavoritePayload) =>
       dispatch({ type: "TOGGLE_FAVORITE", payload: toggleFavoritePayload }),
-    [],
+    [dispatch],
   );
 
-  const moveTask = useCallback((moveTaskPayload: MoveTaskPayload) => {
-    dispatch({ type: "MOVE_TASK", payload: moveTaskPayload });
-  }, []);
+  const moveTask = useCallback(
+    (moveTaskPayload: MoveTaskPayload) => {
+      dispatch({ type: "MOVE_TASK", payload: moveTaskPayload });
+    },
+    [dispatch],
+  );
 
   return (
     <TrelloContext.Provider
@@ -179,7 +181,7 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
   );
 };
 
-const reducer = (state: TrelloState, action: Action): TrelloState => {
+const reducer = (state: TrelloState, action: TrelloAction): TrelloState => {
   switch (action.type) {
     case "ADD_COLUMN": {
       const id = generateId();
@@ -414,7 +416,7 @@ const reducer = (state: TrelloState, action: Action): TrelloState => {
   }
 };
 
-type Action =
+type TrelloAction =
   | { type: "ADD_COLUMN"; payload: AddColumnPayload }
   | { type: "ADD_TASK"; payload: AddTaskPayload }
   | { type: "DELETE_TASK"; payload: DeleteTaskPayload }
