@@ -1,7 +1,7 @@
-import { generateId } from "../common/utils/generateId";
-import { TrelloAction } from "../common/types/trelloActions";
-import { TaskData } from "../common/types/taskData";
-import { TrelloState } from "../common/types/trelloState";
+import { generateId } from "../../common/utils/generateId";
+import { TrelloAction } from "../../common/types/trelloActions";
+import { TaskData } from "../../common/types/taskData";
+import { TrelloState } from "../../common/types/trelloState";
 
 export const reducer = (
   state: TrelloState,

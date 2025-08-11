@@ -22,6 +22,7 @@ import { useForm } from "../common/hooks/useForm";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 import { TaskData } from "../common/types/taskData";
+import { useErrorBoundary } from "react-error-boundary";
 
 interface EditTaskProps {
   task: TaskData;
@@ -31,6 +32,7 @@ export const EditTask = ({ task }: EditTaskProps) => {
   const { editTask, uploadImage, getImageById, addImageToTask } = useTrello();
   const [isOpen, setIsModelOpen] = useState(false);
   const { formState, handleChange } = useForm(task);
+  const { showBoundary } = useErrorBoundary();
 
   const handleOpenDialog = () => {
     setIsModelOpen(true);
@@ -49,17 +51,25 @@ export const EditTask = ({ task }: EditTaskProps) => {
     handleCloseDialog();
   };
 
-  const handleFilesChange = (event: ChangeEvent<HTMLInputElement>) => {
+  /**
+   * Upload image here, handle error of local storage exceed
+   * @param event
+   */
+  const handleFilesChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
     if (files && !!files.length) {
       const file = files[0];
       const reader = new FileReader();
       reader.onloadend = () => {
-        const imageId = uploadImage({
-          fileName: file.name,
-          base64Url: reader.result as string,
-        });
-        addImageToTask({ imageId, taskId: task.id });
+        try {
+          const imageId = uploadImage({
+            fileName: file.name,
+            base64Url: reader.result as string,
+          });
+          addImageToTask({ imageId, taskId: task.id });
+        } catch (error) {
+          showBoundary(error);
+        }
       };
       reader.readAsDataURL(file);
     }

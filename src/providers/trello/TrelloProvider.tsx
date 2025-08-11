@@ -1,10 +1,10 @@
 import { type PropsWithChildren, useCallback, useMemo } from "react";
 import { TrelloContext } from "./TrelloContext";
-import { generateId } from "../common/utils/generateId";
-import { useLocalStorage } from "../common/hooks/useLocalStorage";
+import { generateId } from "../../common/utils/generateId";
+import { useLocalStorage } from "../../common/hooks/useLocalStorage";
 
 import { reducer } from "./trelloReducer";
-import { TrelloState } from "../common/types/trelloState";
+import { TrelloState } from "../../common/types/trelloState";
 import {
   AddColumnPayload,
   AddImageToTaskPayload,
@@ -16,7 +16,7 @@ import {
   ToggleFavoritePayload,
   TrelloAction,
   UploadImagePayload,
-} from "../common/types/trelloActions";
+} from "../../common/types/trelloActions";
 
 const initialValue: TrelloState = {
   columns: {},
