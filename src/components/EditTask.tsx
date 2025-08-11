@@ -58,20 +58,17 @@ export const EditTask = ({ task }: EditTaskProps) => {
   const handleFilesChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
     if (files && !!files.length) {
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        try {
-          const imageId = uploadImage({
-            fileName: file.name,
-            base64Url: reader.result as string,
-          });
-          addImageToTask({ imageId, taskId: task.id });
-        } catch (error) {
-          showBoundary(error);
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        const file = files[0];
+        const fileUrl = URL.createObjectURL(file);
+        const imageId = uploadImage({
+          fileName: file.name,
+          base64Url: fileUrl,
+        });
+        addImageToTask({ imageId, taskId: task.id });
+      } catch (error) {
+        showBoundary(error);
+      }
     }
   };
 
