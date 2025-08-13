@@ -1,6 +1,6 @@
 import { type PropsWithChildren, useCallback, useMemo } from "react";
-import { TrelloContext } from "./TrelloContext.ts";
-import { generateId } from "../common/utils/generateId.ts";
+import { TrelloContext } from "./TrelloContext";
+import { generateId } from "../common/utils/generateId";
 import { useLocalStorage } from "../common/hooks/useLocalStorage";
 
 import { reducer } from "./trelloReducer";

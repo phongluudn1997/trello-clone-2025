@@ -1,6 +1,6 @@
-import { useTrello } from "../common/hooks/useTrello.ts";
+import { useTrello } from "../common/hooks/useTrello";
 import { Stack } from "@mui/material";
-import { Column } from "./Column.tsx";
+import { Column } from "./Column";
 
 export const ColumnList = () => {
   const { columns } = useTrello();

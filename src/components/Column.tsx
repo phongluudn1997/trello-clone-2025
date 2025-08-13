@@ -1,7 +1,7 @@
 import { Stack, Typography } from "@mui/material";
-import { TaskList } from "./TaskList.tsx";
-import { AddTask } from "./AddTask.tsx";
-import { SortButton } from "./SortButton.tsx";
+import { TaskList } from "./TaskList";
+import { AddTask } from "./AddTask";
+import { SortButton } from "./SortButton";
 
 import { ColumnData } from "../common/types/columnData";
 
