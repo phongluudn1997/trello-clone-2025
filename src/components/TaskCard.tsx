@@ -5,10 +5,10 @@ import {
   CardHeader,
   Typography,
 } from "@mui/material";
-import { EditTask } from "./EditTask.tsx";
+import { EditTask } from "./EditTask";
 import NotesIcon from "@mui/icons-material/Notes";
-import { MoveTask } from "./MoveTask.tsx";
-import { FavoriteButton } from "./FavoriteButton.tsx";
+import { MoveTask } from "./MoveTask";
+import { FavoriteButton } from "./FavoriteButton";
 import { DeleteTask } from "./DeleteTask";
 
 import { TaskData } from "../common/types/taskData";

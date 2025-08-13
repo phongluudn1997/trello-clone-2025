@@ -1,4 +1,4 @@
-import { AddColumn } from "../../src/components/AddColumn.tsx";
+import { AddColumn } from "../../src/components/AddColumn";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { useToggle } from "../../src/common/hooks/useToggle";
