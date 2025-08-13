@@ -10,9 +10,14 @@ const config: Config = {
   setupFilesAfterEnv: ["<rootDir>/test/jest.setup.ts"],
   // An array of regexp pattern strings that are matched against all source file paths,
   // matched files will be processed with the transformer.
+  preset: "ts-jest",
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.jsx?$": ["ts-jest", { useESM: true }],
   },
+  transformIgnorePatterns: [
+    "node_modules/(?!react-error-boundary)", // allow Jest to transform it
+  ],
   // A map from regular expressions to module names that allow to stub out resources
   moduleNameMapper: {
     // This handles CSS imports

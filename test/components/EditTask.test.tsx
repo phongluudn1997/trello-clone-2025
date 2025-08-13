@@ -1,3 +1,4 @@
+import React from "react";
 import {
   render,
   screen,
@@ -8,10 +9,12 @@ import { EditTask } from "../../src/components/EditTask";
 import { useTrello } from "../../src/common/hooks/useTrello";
 import { useForm } from "../../src/common/hooks/useForm";
 import "@testing-library/jest-dom";
+import { useErrorBoundary } from "react-error-boundary";
 
 // Mock the custom hooks to control their behavior during the test.
 jest.mock("../../src/common/hooks/useTrello");
 jest.mock("../../src/common/hooks/useForm");
+jest.mock("react-error-boundary");
 
 describe("EditTask", () => {
   // Define mock functions and data
@@ -37,6 +40,10 @@ describe("EditTask", () => {
     imageIds: [],
   };
 
+  beforeAll(() => {
+    global.URL.createObjectURL = jest.fn(() => "data:mockObjectlURL");
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -52,6 +59,10 @@ describe("EditTask", () => {
     (useForm as jest.Mock).mockReturnValue({
       formState: mockFormState,
       handleChange: mockHandleChange,
+    });
+
+    (useErrorBoundary as jest.Mock).mockReturnValue({
+      showBoundary: () => undefined,
     });
 
     // Mock the FileReader API to simulate a file upload
@@ -138,7 +149,7 @@ describe("EditTask", () => {
     expect(mockUploadImage).toHaveBeenCalledTimes(1);
     expect(mockUploadImage).toHaveBeenCalledWith({
       fileName: file.name,
-      base64Url: "data:image/png;base64,mockImageData",
+      base64Url: "data:mockObjectlURL",
     });
 
     expect(mockAddImageToTask).toHaveBeenCalledTimes(1);
