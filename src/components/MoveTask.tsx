@@ -11,7 +11,7 @@ import {
   Stack,
 } from "@mui/material";
 import { type FormEvent, useState } from "react";
-import { useTrello } from "../common/hooks/useTrello.ts";
+import { useTrello } from "../common/hooks/useTrello";
 
 interface MoveTaskProps {
   taskId: string;

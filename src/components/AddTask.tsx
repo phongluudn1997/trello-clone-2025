@@ -1,9 +1,9 @@
-import { useToggle } from "../common/hooks/useToggle.ts";
+import { useToggle } from "../common/hooks/useToggle";
 import { Button, IconButton, TextField } from "@mui/material";
 import type { FormEvent } from "react";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { useTrello } from "../common/hooks/useTrello.ts";
-import { useForm } from "../common/hooks/useForm.ts";
+import { useTrello } from "../common/hooks/useTrello";
+import { useForm } from "../common/hooks/useForm";
 
 interface AddTaskProps {
   columnId: string;
