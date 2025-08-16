@@ -2,6 +2,12 @@ import { generateId } from "../../common/utils/generateId";
 import { TrelloAction } from "../../common/types/trelloActions";
 import { TaskData } from "../../common/types/taskData";
 import { TrelloState } from "../../common/types/trelloState";
+import {
+  insertItemAtIndex,
+  moveItem,
+  removeItemAtIndex,
+} from "../../common/utils/arrayUtils";
+import { filterObject } from "../../common/utils/objectUtils";
 
 export const reducer = (
   state: TrelloState,
@@ -60,12 +66,12 @@ export const reducer = (
         throw new Error("Task does not belong to Column");
       }
 
-      const newImages = { ...state.images };
-      existedTask.imageIds.forEach((imageId) => delete newImages[imageId]);
+      const newImages = filterObject(
+        state.images,
+        (key) => !existedTask.imageIds.includes(key),
+      );
 
-      const newTasks = { ...state.tasks };
-      delete newTasks[taskId];
-
+      const newTasks = filterObject(state.tasks, (key) => key !== taskId);
       const taskIds = existedColumn.taskIds.filter((id) => id !== taskId);
 
       return {
@@ -143,14 +149,14 @@ export const reducer = (
       }
 
       const sortByName = (tasks: TaskData[]): TaskData[] => {
-        return tasks.sort((a, b) => {
-          if (sortDirection === "ASC") {
-            return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
-          }
-          if (sortDirection === "DESC") {
-            return a.name.toLowerCase() < b.name.toLowerCase() ? 1 : -1;
-          }
-          return 0;
+        const shallowCoppyTasks = [...tasks];
+        return shallowCoppyTasks.sort((a, b) => {
+          const nameA = a.name.toLowerCase();
+          const nameB = b.name.toLowerCase();
+
+          return sortDirection === "ASC"
+            ? nameA.localeCompare(nameB)
+            : nameB.localeCompare(nameA);
         });
       };
 
@@ -196,22 +202,20 @@ export const reducer = (
         action.payload;
       const sourceColumn = state.columns[sourceColumnId];
       const targetColumn = state.columns[targetColumnId];
+      const sourceIndex = sourceColumn.taskIds.indexOf(taskId);
 
       if (sourceColumnId === targetColumnId) {
-        const removedTaskIds = sourceColumn.taskIds.filter(
-          (id) => id !== taskId,
-        );
+        if (sourceIndex === targetIndex) {
+          return state;
+        }
+
         return {
           ...state,
           columns: {
             ...state.columns,
             [sourceColumnId]: {
               ...sourceColumn,
-              taskIds: [
-                ...removedTaskIds.slice(0, targetIndex),
-                taskId,
-                ...removedTaskIds.slice(targetIndex),
-              ],
+              taskIds: moveItem(sourceColumn.taskIds, sourceIndex, targetIndex),
             },
           },
         };
@@ -223,15 +227,15 @@ export const reducer = (
           ...state.columns,
           [sourceColumnId]: {
             ...sourceColumn,
-            taskIds: sourceColumn.taskIds.filter((id) => id !== taskId),
+            taskIds: removeItemAtIndex(sourceColumn.taskIds, sourceIndex),
           },
           [targetColumnId]: {
             ...targetColumn,
-            taskIds: [
-              ...targetColumn.taskIds.slice(0, targetIndex),
+            taskIds: insertItemAtIndex(
+              targetColumn.taskIds,
               taskId,
-              ...targetColumn.taskIds.slice(targetIndex),
-            ],
+              targetIndex,
+            ),
           },
         },
       };
