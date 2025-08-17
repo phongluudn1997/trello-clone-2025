@@ -59,11 +59,13 @@ export const reducer = (
       }
 
       if (!existedColumn) {
-        throw new Error("Does not find column");
+        console.error(`Column with id ${columnId} not found.`);
+        return state;
       }
 
       if (!existedColumn.taskIds.includes(taskId)) {
-        throw new Error("Task does not belong to Column");
+        console.error(`Task ${taskId} does not belong to Column ${columnId}`);
+        return state;
       }
 
       const newImages = filterObject(
