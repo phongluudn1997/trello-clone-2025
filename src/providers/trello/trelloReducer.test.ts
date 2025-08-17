@@ -176,4 +176,121 @@ describe("trelloReducer", () => {
     expect(nextState.columns[column.id].taskIds).toHaveLength(0);
     expect(nextState.tasks).not.toHaveProperty(task.id);
   });
+
+  describe("Edit Task", () => {
+    const task: TaskData = {
+      id: "task-1",
+      name: "Task 1",
+      description: "",
+      imageIds: [],
+      favorite: false,
+    };
+    test("should return same state if found no task", () => {
+      const updatedTask: TaskData = {
+        id: "task-1",
+        name: "Task 1 Updated",
+        description: "",
+        imageIds: [],
+        favorite: false,
+      };
+
+      const initialState: TrelloState = {
+        columnIds: [],
+        tasks: {},
+        columns: {},
+        images: {},
+      };
+
+      const action: TrelloAction = {
+        type: "EDIT_TASK",
+        payload: { taskId: task.id, updatedTask },
+      };
+
+      const nextState = reducer(initialState, action);
+      expect(nextState).toStrictEqual(initialState);
+    });
+
+    test("should not allow to override the task id", () => {
+      const updatedTask: TaskData = {
+        ...task,
+        id: "task-2",
+      };
+
+      const initialState: TrelloState = {
+        columnIds: [],
+        tasks: {},
+        columns: {},
+        images: {},
+      };
+
+      const action: TrelloAction = {
+        type: "EDIT_TASK",
+        payload: { taskId: task.id, updatedTask },
+      };
+
+      const nextState = reducer(initialState, action);
+      expect(nextState).toStrictEqual(initialState);
+    });
+    test("should not allow to edit the attachments", () => {
+      const initialState: TrelloState = {
+        columnIds: [],
+        images: {},
+        columns: {},
+        tasks: { [task.id]: task },
+      };
+
+      const action: TrelloAction = {
+        type: "EDIT_TASK",
+        payload: {
+          taskId: task.id,
+          updatedTask: { ...task, imageIds: ["image-1"] },
+        },
+      };
+
+      const nextState = reducer(initialState, action);
+
+      expect(nextState).toStrictEqual(initialState);
+    });
+
+    test("should update task", () => {
+      const initialState: TrelloState = {
+        columnIds: [],
+        columns: {},
+        images: {},
+        tasks: { [task.id]: task },
+      };
+      const action: TrelloAction = {
+        type: "EDIT_TASK",
+        payload: {
+          taskId: task.id,
+          updatedTask: { ...task, name: "Task 1 Updated" },
+        },
+      };
+      const nextState = reducer(initialState, action);
+      expect(nextState.tasks[task.id].name).toBe("Task 1 Updated");
+    });
+  });
+
+  describe("Upload image", () => {
+    test("should upload image", () => {
+      const initialState: TrelloState = {
+        columnIds: [],
+        images: {},
+        columns: {},
+        tasks: {},
+      };
+
+      const action: TrelloAction = {
+        type: "UPLOAD_IMAGE",
+        payload: {
+          imageId: "image-1",
+          fileName: "image.png",
+          base64Url: "data:image/png;base64,mockData",
+        },
+      };
+
+      const nextState = reducer(initialState, action);
+      expect(nextState.images).toHaveProperty("image-1");
+    });
+  });
 });
