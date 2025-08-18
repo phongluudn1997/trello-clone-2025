@@ -7,7 +7,6 @@ import { reducer } from "./trelloReducer";
 import { TrelloState } from "../../common/types/trelloState";
 import {
   AddColumnPayload,
-  AddImageToTaskPayload,
   AddTaskPayload,
   DeleteTaskPayload,
   EditTaskPayload,
@@ -105,9 +104,19 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
     [dispatch],
   );
 
-  const addImageToTask = useCallback(
-    (addImageToTaskPayload: AddImageToTaskPayload) =>
-      dispatch({ type: "ADD_IMAGE_TO_TASK", payload: addImageToTaskPayload }),
+  const uploadImages = useCallback(
+    (uploadImagesPayload: UploadImagePayload[]) => {
+      const payload = uploadImagesPayload.map((payload) => ({
+        imageId: generateId(),
+        ...payload,
+      }));
+      dispatch({
+        type: "UPLOAD_IMAGES",
+        payload,
+      });
+
+      return payload.map(({ imageId }) => imageId);
+    },
     [dispatch],
   );
 
@@ -142,8 +151,8 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
         getTaskById: selectTaskById,
         editTask,
         uploadImage,
+        uploadImages,
         getImageById: selectImageById,
-        addImageToTask,
         sortTasks,
         toggleFavorite,
         selectColumnById,

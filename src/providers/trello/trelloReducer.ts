@@ -8,6 +8,7 @@ import {
   removeItemAtIndex,
 } from "../../common/utils/arrayUtils";
 import { filterObject } from "../../common/utils/objectUtils";
+import { ImageData } from "../../common/types/imageData";
 
 export const reducer = (
   state: TrelloState,
@@ -102,9 +103,6 @@ export const reducer = (
           [taskId]: {
             ...currentTask,
             ...updatedTask,
-            // Avoid overriding uploaded images with old data,
-            // New images must be added via ADD_IMAGE_TO_TASK
-            imageIds: currentTask.imageIds,
             id: taskId,
           },
         },
@@ -118,30 +116,21 @@ export const reducer = (
         images: { ...state.images, [imageId]: { fileName, base64Url } },
       };
     }
-    case "ADD_IMAGE_TO_TASK": {
-      const { imageId, taskId } = action.payload;
-      const existedTask = state.tasks[taskId];
-      const existedImage = state.images[imageId];
 
-      if (!existedImage) {
-        console.error(`Image with id ${imageId} not found.`);
-        return state;
-      }
-      if (!existedTask) {
-        console.error(`Task with id ${taskId} not found.`);
-        return state;
-      }
+    case "UPLOAD_IMAGES": {
+      const newImages: Record<string, ImageData> = action.payload.reduce(
+        (acc, { imageId, base64Url, fileName }) => {
+          acc[imageId] = { base64Url, fileName, id: imageId };
+          return acc;
+        },
+        {},
+      );
       return {
         ...state,
-        tasks: {
-          ...state.tasks,
-          [taskId]: {
-            ...existedTask,
-            imageIds: [...existedTask.imageIds, imageId],
-          },
-        },
+        images: { ...state.images, ...newImages },
       };
     }
+
     case "SORT_TASKS": {
       const { columnId, sortDirection } = action.payload;
       const existedColumn = state.columns[columnId];

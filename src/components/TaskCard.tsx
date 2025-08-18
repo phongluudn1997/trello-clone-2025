@@ -13,6 +13,7 @@ import { DeleteTask } from "./DeleteTask";
 
 import { TaskData } from "../common/types/taskData";
 import { MoveTaskForm } from "./MoveTaskForm";
+import { EditTaskForm } from "./EditTaskForm";
 
 interface TaskCardProps {
   task: TaskData;
@@ -27,7 +28,9 @@ export const TaskCard = ({ task, columnId }: TaskCardProps) => {
         action={
           <ButtonGroup size="small">
             <FavoriteButton task={task} />
-            <EditTask task={task} />
+            <EditTask>
+              <EditTaskForm task={task} />
+            </EditTask>
             <DeleteTask taskId={task.id} columnId={columnId} />
             <MoveTask>
               <MoveTaskForm taskId={task.id} columnId={columnId} />
