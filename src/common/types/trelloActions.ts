@@ -14,7 +14,6 @@ export type UploadImagePayload = {
   fileName: string;
   base64Url: string;
 };
-export type AddImageToTaskPayload = { imageId: string; taskId: string };
 export type SortTasksPayload = {
   columnId: string;
   sortDirection: SortDirection;
@@ -36,8 +35,8 @@ export interface TrelloContextValue {
   getTaskById: (taskId: string) => TaskData | undefined;
   editTask: (editTaskPayload: EditTaskPayload) => void;
   uploadImage: (uploadImagePayload: UploadImagePayload) => string;
+  uploadImages: (uploadImagePayload: UploadImagePayload[]) => string[];
   getImageById: (imageId: string) => ImageData | undefined;
-  addImageToTask: (addImageToTask: AddImageToTaskPayload) => void;
   sortTasks: (sortTasksPayload: SortTasksPayload) => void;
   toggleFavorite: (toggleFavoritePayload: ToggleFavoritePayload) => void;
   selectColumnById: (columnId: string) => ColumnData | undefined;
@@ -50,7 +49,10 @@ export type TrelloAction =
   | { type: "DELETE_TASK"; payload: DeleteTaskPayload }
   | { type: "EDIT_TASK"; payload: EditTaskPayload }
   | { type: "UPLOAD_IMAGE"; payload: UploadImagePayload & { imageId: string } }
-  | { type: "ADD_IMAGE_TO_TASK"; payload: AddImageToTaskPayload }
+  | {
+      type: "UPLOAD_IMAGES";
+      payload: Array<UploadImagePayload & { imageId: string }>;
+    }
   | { type: "SORT_TASKS"; payload: SortTasksPayload }
   | { type: "TOGGLE_FAVORITE"; payload: ToggleFavoritePayload }
   | { type: "MOVE_TASK"; payload: MoveTaskPayload };

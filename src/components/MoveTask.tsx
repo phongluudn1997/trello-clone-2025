@@ -1,45 +1,25 @@
-import { useState } from "react";
+import React, { PropsWithChildren } from "react";
 import DriveFileMoveIcon from "@mui/icons-material/DriveFileMove";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  IconButton,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Stack,
-} from "@mui/material";
-import { type FormEvent, useState } from "react";
-import { useTrello } from "../common/hooks/useTrello";
-
-import { MoveTaskForm } from "./MoveTaskForm";
+import { IconButton } from "@mui/material";
+import { TrelloDialogProvider } from "./dialog/TrelloDialogProvider";
+import { TrelloDialogTrigger } from "./dialog/TrelloDialogTrigger";
+import { TrelloDialog } from "./dialog/TrelloDialog";
 
 export interface MoveTaskProps {
   taskId: string;
   columnId: string;
 }
 
-export const MoveTask = (props: MoveTaskProps) => {
-  const [isOpen, setIsModelOpen] = useState(false);
-
-  const handleOpenDialog = () => {
-    setIsModelOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setIsModelOpen(false);
-  };
-
+export const MoveTask = ({ children }: PropsWithChildren) => {
   return (
-    <div>
-      <IconButton onClick={handleOpenDialog} aria-label="moveTask">
-        <DriveFileMoveIcon />
-      </IconButton>
-      <Dialog open={isOpen} fullWidth onClose={handleCloseDialog}>
-        <MoveTaskForm {...props} onClose={handleCloseDialog} />
-      </Dialog>
-    </div>
+    <TrelloDialogProvider>
+      <TrelloDialogTrigger>
+        <IconButton aria-label="moveTask">
+          <DriveFileMoveIcon />
+        </IconButton>
+      </TrelloDialogTrigger>
+
+      <TrelloDialog>{children}</TrelloDialog>
+    </TrelloDialogProvider>
   );
 };

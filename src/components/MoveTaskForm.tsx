@@ -1,6 +1,6 @@
 import { MoveTaskProps } from "./MoveTask";
 import { useTrello } from "../common/hooks/useTrello";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   DialogActions,
@@ -10,16 +10,10 @@ import {
   SelectChangeEvent,
   Stack,
 } from "@mui/material";
+import { TrelloDialogClose } from "./dialog/TrelloDialogClose";
+import { TrelloDialogConfirm } from "./dialog/TrelloDialogConfirm";
 
-interface MoveTaskFormProps extends MoveTaskProps {
-  onClose: () => void;
-}
-
-export const MoveTaskForm = ({
-  columnId,
-  taskId,
-  onClose,
-}: MoveTaskFormProps) => {
+export const MoveTaskForm = ({ columnId, taskId }: MoveTaskProps) => {
   const { columns, moveTask, selectColumnById } = useTrello();
   const column = selectColumnById(columnId);
   const taskIndex = column.taskIds.indexOf(taskId);
@@ -53,16 +47,13 @@ export const MoveTaskForm = ({
     }));
   };
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
+  const handleSubmit = async () => {
     moveTask({
       taskId,
       sourceColumnId: columnId,
       targetColumnId: formState.targetColumnId,
       targetIndex: Number(formState.targetIndex),
     });
-
-    onClose();
   };
 
   /**
@@ -82,39 +73,45 @@ export const MoveTaskForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} role="form">
-      <DialogContent style={{ paddingTop: 20 }}>
-        <Stack direction="row" spacing={2}>
-          <Select
-            label="Target Column"
-            value={formState.targetColumnId}
-            name="targetColumnId"
-            onChange={handleColumnChange}
-          >
-            {columns.map((column) => (
-              <MenuItem key={column.id} value={column.id}>
-                {column.name}
-              </MenuItem>
-            ))}
-          </Select>
-          <Select
-            label="Position"
-            name="targetIndex"
-            value={formState.targetIndex}
-            onChange={handleIndexChange}
-          >
-            {targetIndexOptions().map((_, index) => (
-              <MenuItem key={index} value={index.toString()}>
-                {index}
-              </MenuItem>
-            ))}
-          </Select>
-        </Stack>
-      </DialogContent>
+    <>
+      <form role="form">
+        <DialogContent style={{ paddingTop: 20 }}>
+          <Stack direction="row" spacing={2}>
+            <Select
+              label="Target Column"
+              value={formState.targetColumnId}
+              name="targetColumnId"
+              onChange={handleColumnChange}
+            >
+              {columns.map((column) => (
+                <MenuItem key={column.id} value={column.id}>
+                  {column.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Select
+              label="Position"
+              name="targetIndex"
+              value={formState.targetIndex}
+              onChange={handleIndexChange}
+            >
+              {targetIndexOptions().map((_, index) => (
+                <MenuItem key={index} value={index.toString()}>
+                  {index}
+                </MenuItem>
+              ))}
+            </Select>
+          </Stack>
+        </DialogContent>
+      </form>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button type="submit">Submit</Button>
+        <TrelloDialogClose>
+          <Button>Cancel</Button>
+        </TrelloDialogClose>
+        <TrelloDialogConfirm onConfirm={handleSubmit}>
+          <Button variant="contained">Submit</Button>
+        </TrelloDialogConfirm>
       </DialogActions>
-    </form>
+    </>
   );
 };

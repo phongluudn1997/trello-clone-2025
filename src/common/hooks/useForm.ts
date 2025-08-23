@@ -16,5 +16,5 @@ export const useForm = <TFormData>(initialValue: TFormData) => {
     setFormState(initialValue);
   }, [initialValue]);
 
-  return { formState, handleChange, reset };
+  return { formState, setFormState, handleChange, reset };
 };

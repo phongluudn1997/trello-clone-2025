@@ -1,7 +1,14 @@
-import { generateId } from "../common/utils/generateId";
-import { TrelloAction } from "../common/types/trelloActions";
-import { TaskData } from "../common/types/taskData";
-import { TrelloState } from "../common/types/trelloState";
+import { generateId } from "../../common/utils/generateId";
+import { TrelloAction } from "../../common/types/trelloActions";
+import { TaskData } from "../../common/types/taskData";
+import { TrelloState } from "../../common/types/trelloState";
+import {
+  insertItemAtIndex,
+  moveItem,
+  removeItemAtIndex,
+} from "../../common/utils/arrayUtils";
+import { filterObject } from "../../common/utils/objectUtils";
+import { ImageData } from "../../common/types/imageData";
 
 export const reducer = (
   state: TrelloState,
@@ -53,19 +60,21 @@ export const reducer = (
       }
 
       if (!existedColumn) {
-        throw new Error("Does not find column");
+        console.error(`Column with id ${columnId} not found.`);
+        return state;
       }
 
       if (!existedColumn.taskIds.includes(taskId)) {
-        throw new Error("Task does not belong to Column");
+        console.error(`Task ${taskId} does not belong to Column ${columnId}`);
+        return state;
       }
 
-      const newImages = { ...state.images };
-      existedTask.imageIds.forEach((imageId) => delete newImages[imageId]);
+      const newImages = filterObject(
+        state.images,
+        (key) => !existedTask.imageIds.includes(key),
+      );
 
-      const newTasks = { ...state.tasks };
-      delete newTasks[taskId];
-
+      const newTasks = filterObject(state.tasks, (key) => key !== taskId);
       const taskIds = existedColumn.taskIds.filter((id) => id !== taskId);
 
       return {
@@ -94,9 +103,6 @@ export const reducer = (
           [taskId]: {
             ...currentTask,
             ...updatedTask,
-            // Avoid overriding uploaded images with old data,
-            // New images must be added via ADD_IMAGE_TO_TASK
-            imageIds: currentTask.imageIds,
             id: taskId,
           },
         },
@@ -110,30 +116,21 @@ export const reducer = (
         images: { ...state.images, [imageId]: { fileName, base64Url } },
       };
     }
-    case "ADD_IMAGE_TO_TASK": {
-      const { imageId, taskId } = action.payload;
-      const existedTask = state.tasks[taskId];
-      const existedImage = state.images[imageId];
 
-      if (!existedImage) {
-        console.error(`Image with id ${imageId} not found.`);
-        return state;
-      }
-      if (!existedTask) {
-        console.error(`Task with id ${taskId} not found.`);
-        return state;
-      }
+    case "UPLOAD_IMAGES": {
+      const newImages: Record<string, ImageData> = action.payload.reduce(
+        (acc, { imageId, base64Url, fileName }) => {
+          acc[imageId] = { base64Url, fileName, id: imageId };
+          return acc;
+        },
+        {},
+      );
       return {
         ...state,
-        tasks: {
-          ...state.tasks,
-          [taskId]: {
-            ...existedTask,
-            imageIds: [...existedTask.imageIds, imageId],
-          },
-        },
+        images: { ...state.images, ...newImages },
       };
     }
+
     case "SORT_TASKS": {
       const { columnId, sortDirection } = action.payload;
       const existedColumn = state.columns[columnId];
@@ -143,14 +140,14 @@ export const reducer = (
       }
 
       const sortByName = (tasks: TaskData[]): TaskData[] => {
-        return tasks.sort((a, b) => {
-          if (sortDirection === "ASC") {
-            return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
-          }
-          if (sortDirection === "DESC") {
-            return a.name.toLowerCase() < b.name.toLowerCase() ? 1 : -1;
-          }
-          return 0;
+        const shallowCoppyTasks = [...tasks];
+        return shallowCoppyTasks.sort((a, b) => {
+          const nameA = a.name.toLowerCase();
+          const nameB = b.name.toLowerCase();
+
+          return sortDirection === "ASC"
+            ? nameA.localeCompare(nameB)
+            : nameB.localeCompare(nameA);
         });
       };
 
@@ -196,22 +193,20 @@ export const reducer = (
         action.payload;
       const sourceColumn = state.columns[sourceColumnId];
       const targetColumn = state.columns[targetColumnId];
+      const sourceIndex = sourceColumn.taskIds.indexOf(taskId);
 
       if (sourceColumnId === targetColumnId) {
-        const removedTaskIds = sourceColumn.taskIds.filter(
-          (id) => id !== taskId,
-        );
+        if (sourceIndex === targetIndex) {
+          return state;
+        }
+
         return {
           ...state,
           columns: {
             ...state.columns,
             [sourceColumnId]: {
               ...sourceColumn,
-              taskIds: [
-                ...removedTaskIds.slice(0, targetIndex),
-                taskId,
-                ...removedTaskIds.slice(targetIndex),
-              ],
+              taskIds: moveItem(sourceColumn.taskIds, sourceIndex, targetIndex),
             },
           },
         };
@@ -223,15 +218,15 @@ export const reducer = (
           ...state.columns,
           [sourceColumnId]: {
             ...sourceColumn,
-            taskIds: sourceColumn.taskIds.filter((id) => id !== taskId),
+            taskIds: removeItemAtIndex(sourceColumn.taskIds, sourceIndex),
           },
           [targetColumnId]: {
             ...targetColumn,
-            taskIds: [
-              ...targetColumn.taskIds.slice(0, targetIndex),
+            taskIds: insertItemAtIndex(
+              targetColumn.taskIds,
               taskId,
-              ...targetColumn.taskIds.slice(targetIndex),
-            ],
+              targetIndex,
+            ),
           },
         },
       };

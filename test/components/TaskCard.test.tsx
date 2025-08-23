@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { TaskCard } from "../../src/components/TaskCard";
-import { useTrello } from "../../src/common/hooks/useTrello";
 import { EditTask } from "../../src/components/EditTask";
 import { MoveTask } from "../../src/components/MoveTask";
 import { FavoriteButton } from "../../src/components/FavoriteButton";
 import "@testing-library/jest-dom";
+import { useTrello } from "../../src/common/hooks/useTrello";
 
 jest.mock("../../src/components/EditTask", () => ({
   EditTask: jest.fn(({ task }) => (
@@ -12,10 +12,8 @@ jest.mock("../../src/components/EditTask", () => ({
   )),
 }));
 jest.mock("../../src/components/MoveTask", () => ({
-  MoveTask: jest.fn(({ taskId, columnId }) => (
-    <div data-testid={`mock-move-task-${taskId}-${columnId}`}>
-      Mock MoveTask
-    </div>
+  MoveTask: jest.fn(() => (
+    <div data-testid={`mock-move-task`}>Mock MoveTask</div>
   )),
 }));
 jest.mock("../../src/components/FavoriteButton", () => ({
@@ -63,9 +61,7 @@ describe("TaskCard", () => {
     expect(editTaskMock).toBeInTheDocument();
     expect(EditTask).toHaveBeenCalledTimes(1);
 
-    const moveTaskMock = screen.getByTestId(
-      `mock-move-task-${mockTask.id}-${mockColumnId}`,
-    );
+    const moveTaskMock = screen.getByTestId(`mock-move-task`);
     expect(moveTaskMock).toBeInTheDocument();
     expect(MoveTask).toHaveBeenCalledTimes(1);
   });
@@ -85,16 +81,16 @@ describe("TaskCard", () => {
     expect(notesIcon).not.toBeInTheDocument();
   });
 
-  test("should call deleteTask with the correct taskId and columnId when the delete button is clicked", () => {
+  test("should open confirmation dialog with the correct taskId and columnId when the delete button is clicked", () => {
     render(<TaskCard task={mockTask} columnId={mockColumnId} />);
 
     const deleteButton = screen.getByRole("button", { name: /delete/i });
     fireEvent.click(deleteButton);
 
-    expect(mockDeleteTask).toHaveBeenCalledTimes(1);
-    expect(mockDeleteTask).toHaveBeenCalledWith({
-      taskId: mockTask.id,
-      columnId: mockColumnId,
-    });
+    const confirmationDialog = screen.queryByText(
+      "Are you sure want to delete this task?",
+    );
+
+    expect(confirmationDialog).toBeInTheDocument();
   });
 });

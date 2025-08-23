@@ -1,13 +1,12 @@
 import { type PropsWithChildren, useCallback, useMemo } from "react";
 import { TrelloContext } from "./TrelloContext";
-import { generateId } from "../common/utils/generateId";
-import { useLocalStorage } from "../common/hooks/useLocalStorage";
+import { generateId } from "../../common/utils/generateId";
+import { useLocalStorage } from "../../common/hooks/useLocalStorage";
 
 import { reducer } from "./trelloReducer";
-import { TrelloState } from "../common/types/trelloState";
+import { TrelloState } from "../../common/types/trelloState";
 import {
   AddColumnPayload,
-  AddImageToTaskPayload,
   AddTaskPayload,
   DeleteTaskPayload,
   EditTaskPayload,
@@ -16,7 +15,7 @@ import {
   ToggleFavoritePayload,
   TrelloAction,
   UploadImagePayload,
-} from "../common/types/trelloActions";
+} from "../../common/types/trelloActions";
 
 const initialValue: TrelloState = {
   columns: {},
@@ -105,9 +104,19 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
     [dispatch],
   );
 
-  const addImageToTask = useCallback(
-    (addImageToTaskPayload: AddImageToTaskPayload) =>
-      dispatch({ type: "ADD_IMAGE_TO_TASK", payload: addImageToTaskPayload }),
+  const uploadImages = useCallback(
+    (uploadImagesPayload: UploadImagePayload[]) => {
+      const payload = uploadImagesPayload.map((payload) => ({
+        imageId: generateId(),
+        ...payload,
+      }));
+      dispatch({
+        type: "UPLOAD_IMAGES",
+        payload,
+      });
+
+      return payload.map(({ imageId }) => imageId);
+    },
     [dispatch],
   );
 
@@ -142,8 +151,8 @@ export const TrelloProvider = ({ children }: PropsWithChildren) => {
         getTaskById: selectTaskById,
         editTask,
         uploadImage,
+        uploadImages,
         getImageById: selectImageById,
-        addImageToTask,
         sortTasks,
         toggleFavorite,
         selectColumnById,

@@ -1,13 +1,16 @@
-import { ColumnData } from "../../src/common/types/columnData";
-import { useTrello } from "../../src/common/hooks/useTrello";
+import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { useTrello } from "../../src/common/hooks/useTrello";
+import { ColumnData } from "../../src/common/types/columnData";
 import { MoveTaskForm } from "../../src/components/MoveTaskForm";
+import { useTrelloDialog } from "../../src/components/dialog/useTrelloDialog";
 
 jest.mock("../../src/common/hooks/useTrello");
+jest.mock("../../src/components/dialog/useTrelloDialog");
 
 describe("MoveTaskForm", () => {
   const mockMoveTask = jest.fn();
-  const mockOnClose = jest.fn();
+  const mockSetIsOpen = jest.fn();
   const mockColumns: ColumnData[] = [
     {
       id: "column-1",
@@ -21,7 +24,6 @@ describe("MoveTaskForm", () => {
   const mockProps = {
     taskId: "task-1",
     columnId: "column-1",
-    onClose: mockOnClose,
   };
 
   beforeEach(() => {
@@ -32,6 +34,11 @@ describe("MoveTaskForm", () => {
       moveTask: mockMoveTask,
       selectColumnById: (columnId: string) =>
         mockColumns.find((column) => column.id === columnId),
+    });
+
+    (useTrelloDialog as jest.Mock).mockReturnValue({
+      isOpen: true,
+      setIsOpen: mockSetIsOpen,
     });
   });
 
@@ -57,7 +64,6 @@ describe("MoveTaskForm", () => {
       targetColumnId: "column-1",
       targetIndex: 0,
     });
-    expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
   test("should change the target column and update position options", () => {

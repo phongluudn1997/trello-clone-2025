@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MoveTask } from "../../src/components/MoveTask";
 import "@testing-library/jest-dom";
+import { MoveTaskForm } from "../../src/components/MoveTaskForm";
 
 jest.mock("../../src/components/MoveTaskForm", () => ({
   MoveTaskForm: jest.fn(() => (
@@ -14,7 +15,11 @@ describe("MoveTask", () => {
   });
 
   test("should open the dialog and render MoveTaskForm when icon button is clicked", () => {
-    render(<MoveTask taskId="task-1" columnId="column-1" />);
+    render(
+      <MoveTask>
+        <MoveTaskForm taskId={"task-1"} columnId={"column-1"} />
+      </MoveTask>,
+    );
 
     // Initially, the dialog and form should not be present
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
