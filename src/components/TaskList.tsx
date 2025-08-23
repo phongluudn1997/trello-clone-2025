@@ -1,6 +1,6 @@
-import { useTrello } from "../common/hooks/useTrello.ts";
+import { useTrello } from "../common/hooks/useTrello";
 import { Stack } from "@mui/material";
-import { TaskCard } from "./TaskCard.tsx";
+import { TaskCard } from "./TaskCard";
 
 export const TaskList = ({ columnId }: { columnId: string }) => {
   const { tasksByColumnId } = useTrello();
