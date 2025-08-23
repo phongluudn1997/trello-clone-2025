@@ -20,7 +20,6 @@ import type { ChangeEvent } from "react";
 import { getFileReaderResults } from "../common/utils/fileReader";
 import { useTrello } from "../common/hooks/useTrello";
 import { useForm } from "../common/hooks/useForm";
-import { useErrorBoundary } from "react-error-boundary";
 import { TaskData } from "../common/types/taskData";
 
 interface EditTaskFormProps {
@@ -30,7 +29,6 @@ interface EditTaskFormProps {
 export const EditTaskForm = ({ task }: EditTaskFormProps) => {
   const { formState, setFormState, handleChange } = useForm(task);
   const { editTask, uploadImages, getImageById } = useTrello();
-  const { showBoundary } = useErrorBoundary();
 
   const handleSubmit = async () => {
     editTask({
@@ -42,16 +40,12 @@ export const EditTaskForm = ({ task }: EditTaskFormProps) => {
   const handleFilesChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
     if (files && !!files.length) {
-      try {
-        const fileReaderResults = await getFileReaderResults(files);
-        const imageIds = uploadImages(fileReaderResults);
-        setFormState((formState) => ({
-          ...formState,
-          imageIds: [...formState.imageIds, ...imageIds],
-        }));
-      } catch (error) {
-        showBoundary(error);
-      }
+      const fileReaderResults = await getFileReaderResults(files);
+      const imageIds = uploadImages(fileReaderResults);
+      setFormState((formState) => ({
+        ...formState,
+        imageIds: [...formState.imageIds, ...imageIds],
+      }));
     }
   };
   return (

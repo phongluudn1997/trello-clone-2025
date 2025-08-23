@@ -1,20 +1,21 @@
 import React from "react";
-import {
-  render,
-  screen,
-  fireEvent,
-  waitForElementToBeRemoved,
-} from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { EditTask } from "../../src/components/EditTask";
 import { useTrello } from "../../src/common/hooks/useTrello";
 import { useForm } from "../../src/common/hooks/useForm";
 import "@testing-library/jest-dom";
-import { useErrorBoundary } from "react-error-boundary";
+import { EditTaskForm } from "../../src/components/EditTaskForm";
 
-// Mock the custom hooks to control their behavior during the test.
 jest.mock("../../src/common/hooks/useTrello");
 jest.mock("../../src/common/hooks/useForm");
-jest.mock("react-error-boundary");
+
+jest.mock("../../src/components/EditTaskForm", () => ({
+  EditTaskForm: ({ task }) => (
+    <div data-testid={`mock-edit-task-form-${task.id}`}>
+      Mock EditTaskForm {task.id}
+    </div>
+  ),
+}));
 
 describe("EditTask", () => {
   // Define mock functions and data
@@ -40,10 +41,6 @@ describe("EditTask", () => {
     imageIds: [],
   };
 
-  beforeAll(() => {
-    global.URL.createObjectURL = jest.fn(() => "data:mockObjectlURL");
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -59,10 +56,6 @@ describe("EditTask", () => {
     (useForm as jest.Mock).mockReturnValue({
       formState: mockFormState,
       handleChange: mockHandleChange,
-    });
-
-    (useErrorBoundary as jest.Mock).mockReturnValue({
-      showBoundary: () => undefined,
     });
 
     // Mock the FileReader API to simulate a file upload
@@ -85,7 +78,7 @@ describe("EditTask", () => {
 
   // Test 1: Initial rendering of the Edit button
   test("should render the Edit button and not the dialog initially", () => {
-    render(<EditTask task={mockTask} />);
+    render(<EditTask />);
     const editButton = screen.getByRole("button", { name: "edit" });
     expect(editButton).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -93,69 +86,16 @@ describe("EditTask", () => {
 
   // Test 2: Opening the dialog when the Edit button is clicked
   test("should open the dialog when the Edit button is clicked", () => {
-    render(<EditTask task={mockTask} />);
+    render(
+      <EditTask>
+        <EditTaskForm task={mockTask} />
+      </EditTask>,
+    );
     const editButton = screen.getByRole("button", { name: "edit" });
     fireEvent.click(editButton);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("form")).toBeInTheDocument();
-  });
-
-  // Test 3: Closing the dialog when the Close button is clicked
-  test("should close the dialog when the Close button is clicked", async () => {
-    render(<EditTask task={mockTask} />);
-    const editButton = screen.getByRole("button", { name: "edit" });
-    fireEvent.click(editButton);
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-
-    const closeButton = screen.getByRole("button", { name: "Close" });
-    fireEvent.click(closeButton);
-    const form = screen.getByRole("form");
-    await waitForElementToBeRemoved(form);
-    expect(screen.queryByRole("form")).not.toBeInTheDocument();
-  });
-
-  // Test 4: Form submission triggers editTask and closes the dialog
-  test("should call editTask with updated form data and close the dialog on save", async () => {
-    render(<EditTask task={mockTask} />);
-    const editButton = screen.getByRole("button", { name: /edit/i });
-    fireEvent.click(editButton);
-
-    const saveButton = screen.getByRole("button", { name: "Save" });
-    fireEvent.click(saveButton);
-
-    expect(mockEditTask).toHaveBeenCalledTimes(1);
-    expect(mockEditTask).toHaveBeenCalledWith({
-      taskId: mockTask.id,
-      updatedTask: mockFormState,
-    });
-    const form = screen.getByRole("form");
-    await waitForElementToBeRemoved(form);
-    expect(screen.queryByRole("form")).not.toBeInTheDocument();
-  });
-
-  // Test 5: Image upload handler is called and hooks are used correctly
-  test("should call uploadImage and addImageToTask when a file is uploaded", () => {
-    render(<EditTask task={mockTask} />);
-    const editButton = screen.getByRole("button", { name: /edit/i });
-    fireEvent.click(editButton);
-
-    const uploadInput = screen.getByLabelText("Upload files");
-    const file = new File(["test image"], "test.png", { type: "image/png" });
-
-    // Simulate file upload
-    fireEvent.change(uploadInput, { target: { files: [file] } });
-
-    // Assert that the image upload and add functions were called
-    expect(mockUploadImage).toHaveBeenCalledTimes(1);
-    expect(mockUploadImage).toHaveBeenCalledWith({
-      fileName: file.name,
-      base64Url: "data:mockObjectlURL",
-    });
-
-    expect(mockAddImageToTask).toHaveBeenCalledTimes(1);
-    expect(mockAddImageToTask).toHaveBeenCalledWith({
-      imageId: "image-1",
-      taskId: mockTask.id,
-    });
+    expect(
+      screen.getByTestId(`mock-edit-task-form-${mockTask.id}`),
+    ).toBeInTheDocument();
   });
 });

@@ -7,8 +7,8 @@ import "@testing-library/jest-dom";
 import { useTrello } from "../../src/common/hooks/useTrello";
 
 jest.mock("../../src/components/EditTask", () => ({
-  EditTask: jest.fn(({ task }) => (
-    <div data-testid={`mock-edit-task-${task.id}`}>Mock EditTask</div>
+  EditTask: jest.fn(() => (
+    <div data-testid={`mock-edit-task`}>Mock EditTask</div>
   )),
 }));
 jest.mock("../../src/components/MoveTask", () => ({
@@ -57,7 +57,7 @@ describe("TaskCard", () => {
     expect(favoriteButtonMock).toBeInTheDocument();
     expect(FavoriteButton).toHaveBeenCalledTimes(1);
 
-    const editTaskMock = screen.getByTestId(`mock-edit-task-${mockTask.id}`);
+    const editTaskMock = screen.getByTestId(`mock-edit-task`);
     expect(editTaskMock).toBeInTheDocument();
     expect(EditTask).toHaveBeenCalledTimes(1);
 

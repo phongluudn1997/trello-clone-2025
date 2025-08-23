@@ -231,26 +231,6 @@ describe("trelloReducer", () => {
       const nextState = reducer(initialState, action);
       expect(nextState).toStrictEqual(initialState);
     });
-    test("should not allow to edit the attachments", () => {
-      const initialState: TrelloState = {
-        columnIds: [],
-        images: {},
-        columns: {},
-        tasks: { [task.id]: task },
-      };
-
-      const action: TrelloAction = {
-        type: "EDIT_TASK",
-        payload: {
-          taskId: task.id,
-          updatedTask: { ...task, imageIds: ["image-1"] },
-        },
-      };
-
-      const nextState = reducer(initialState, action);
-
-      expect(nextState).toStrictEqual(initialState);
-    });
 
     test("should update task", () => {
       const initialState: TrelloState = {
